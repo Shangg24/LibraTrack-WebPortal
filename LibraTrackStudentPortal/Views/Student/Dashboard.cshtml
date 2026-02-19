@@ -1,0 +1,173 @@
+﻿@model List<LibraTrackStudentPortal.Models.BorrowedBooksViewModel>
+
+
+<h2>Student Dashboard</h2>
+<p>Welcome to LibraTrack Student Portal</p>
+
+<br />
+<br />
+
+<h3>My Borrowed Books</h3>
+
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card text-white bg-primary shadow">
+            <div class="card-body text-center">
+                <h5>Total Transactions</h5>
+                <h2>@ViewBag.TotalTransactions</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-warning shadow">
+            <div class="card-body text-center">
+                <h5>Currently Borrowed</h5>
+                <h2>@ViewBag.CurrentBorrowed</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-success shadow">
+            <div class="card-body text-center">
+                <h5>Total Returned</h5>
+                <h2>@ViewBag.TotalReturned</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="mb-3 text-end">
+    <a asp-controller="Student"
+       asp-action="RequestBook"
+       class="btn btn-primary">
+        Request a Book
+    </a>
+</div>
+
+
+<div class="row mt-4">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">Currently Borrowed</h5>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Book Title</th>
+                            <th style="width: 120px;">Issued</th>
+                            <th style="width: 120px;">Due Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ViewBag.CurrentlyBorrowed != null && ViewBag.CurrentlyBorrowed.Count > 0)
+                        {
+                            @foreach (var item in ViewBag.CurrentlyBorrowed)
+                            {
+                                <tr>
+                                    <td class="text-start fw-semibold">
+                                        @item.BookTitle
+                                    </td>
+
+                                    <td>
+                                        @item.IssueDate?.ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <td>
+                                        @item.ReturnDate?.ToString("yyyy-MM-dd")
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center">No active borrowed books.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Borrowing History</h5>
+            </div>
+            <div class="card-body">
+
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Book Title</th>
+                            <th style="width: 110px;">Issued</th>
+                            <th style="width: 110px;">Returned</th>
+                            <th style="width: 100px;">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (ViewBag.ReturnedBooks != null && ViewBag.ReturnedBooks.Count > 0)
+                        {
+                            @foreach (var item in ViewBag.ReturnedBooks)
+                            {
+                                <tr>
+                                    <td class="text-start fw-semibold">
+                                        @item.BookTitle
+                                    </td>
+
+                                    <td>
+                                        @item.IssueDate?.ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <td>
+                                        @item.ReturnDate?.ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <td>
+                                        @if (item.Status == "Borrowed")
+                                        {
+                                            <span class="badge bg-warning text-dark">Borrowed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Returned</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">No borrowing history yet.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+

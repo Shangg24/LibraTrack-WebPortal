@@ -1,0 +1,20 @@
+﻿@model List<LibraTrackStudentPortal.Models.book>
+
+<h2>Available Books</h2>
+
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Copies</th>
+    </tr>
+
+    @foreach (var book in Model)
+    {
+        <tr>
+            <td>@book.book_title</td>
+            <td>@book.author</td>
+            <td>@book.Copies</td>
+        </tr>
+    }
+</table>

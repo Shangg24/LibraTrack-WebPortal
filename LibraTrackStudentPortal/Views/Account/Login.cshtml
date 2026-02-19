@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Student Login";
+}
+
+<style>
+    body {
+        background: linear-gradient(to bottom, #3d0f0f, #954a4a);
+    }
+</style>
+
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="card shadow-lg p-4" style="width: 400px; border-radius: 15px;">
+
+        <!-- Logo -->
+        <div class="text-center mb-3">
+            <img src="~/images/Logo.png" alt="LibraTrack Logo" style="width:120px;" />
+            <h4 class="mt-2">LibraTrack Student Portal</h4>
+        </div>
+
+        @model Student
+
+        <form asp-action="Login" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Student Number</label>
+                <input asp-for="ID_no" class="form-control" placeholder="Enter Student Number" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+
+                <div class="input-group">
+                    <input asp-for="password"
+                           type="password"
+                           id="passwordInput"
+                           class="form-control"
+                           placeholder="Enter Password"
+                           required />
+
+                    <button class="btn btn-outline-secondary"
+                            type="button"
+                            onclick="togglePassword()">
+
+                        <i id="toggleIcon" class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-grid mt-3">
+                <button type="submit" class="btn btn-primary">
+                    Login
+                </button>
+            </div>
+
+        </form>
+
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword() {
+
+            var password = document.getElementById("passwordInput");
+            var icon = document.getElementById("toggleIcon");
+
+            if (password.type === "password") {
+                password.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                password.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+        }
+    </script>
+}
+
+
+
+

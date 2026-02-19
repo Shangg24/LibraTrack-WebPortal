@@ -1,0 +1,28 @@
+﻿@model List<LibraTrackStudentPortal.Models.book>
+
+<h2>Request a Book</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Book Title</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.book_title</td>
+                <td>
+                    <form asp-action="SubmitRequest" method="post">
+                        <input type="hidden" name="bookId" value="@book.id" />
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Request
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
