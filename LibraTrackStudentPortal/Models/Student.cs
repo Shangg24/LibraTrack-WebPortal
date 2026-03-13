@@ -14,6 +14,9 @@ namespace LibraTrackStudentPortal.Models
         public string email { get; set; }
 
         [Required]
-        public string password { get; set; }
+        public string passwordHash { get; set; }
+        public bool IsFirstLogin { get; set; }
+
+        public bool IsActive { get; set; }
     }
 }

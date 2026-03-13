@@ -1,18 +1,37 @@
 ﻿@model List<LibraTrackStudentPortal.Models.BorrowedBooksViewModel>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
-<h2>Student Dashboard</h2>
-<p>Welcome to LibraTrack Student Portal</p>
+
+<div class="text-center mb-4">
+
+    <h2 class="fw-bold">
+        Student Dashboard
+    </h2>
+
+    <p class="text-muted fs-5">
+        Welcome, @Context.Session.GetString("StudentName")
+    </p>
+
+</div>
 
 <br />
 <br />
+
+<!--<a asp-controller="Student" asp-action="ChangePassword">Change Password</a>-->
 
 <h3>My Borrowed Books</h3>
 
 <div class="row mb-4">
 
     <div class="col-md-4">
-        <div class="card text-white bg-primary shadow">
+        <div class="card text-white bg-primary dashboard-card">
             <div class="card-body text-center">
                 <h5>Total Transactions</h5>
                 <h2>@ViewBag.TotalTransactions</h2>
@@ -21,7 +40,7 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card text-white bg-warning shadow">
+        <div class="card text-white bg-warning dashboard-card">
             <div class="card-body text-center">
                 <h5>Currently Borrowed</h5>
                 <h2>@ViewBag.CurrentBorrowed</h2>
@@ -30,7 +49,7 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card text-white bg-success shadow">
+        <div class="card text-white bg-success dashboard-card">
             <div class="card-body text-center">
                 <h5>Total Returned</h5>
                 <h2>@ViewBag.TotalReturned</h2>
@@ -38,14 +57,6 @@
         </div>
     </div>
 
-</div>
-
-<div class="mb-3 text-end">
-    <a asp-controller="Student"
-       asp-action="RequestBook"
-       class="btn btn-primary">
-        Request a Book
-    </a>
 </div>
 
 
@@ -73,18 +84,29 @@
                         {
                             @foreach (var item in ViewBag.CurrentlyBorrowed)
                             {
-                                <tr>
+                                var isOverdue = item.Status == "Borrowed"
+                                && item.ReturnDate.Date < DateTime.Now.Date;
+
+                                <tr class="@(isOverdue ? "table-danger" : "")">
+
                                     <td class="text-start fw-semibold">
                                         @item.BookTitle
                                     </td>
 
                                     <td>
-                                        @item.IssueDate?.ToString("yyyy-MM-dd")
+                                        @item.IssueDate.ToString("yyyy-MM-dd")
                                     </td>
 
                                     <td>
-                                        @item.ReturnDate?.ToString("yyyy-MM-dd")
+                                        @item.ReturnDate.ToString("yyyy-MM-dd")
+
+                                        @if (isOverdue)
+                                        {
+                                            <br />
+                                            <span class="badge bg-danger">Overdue</span>
+                                        }
                                     </td>
+
                                 </tr>
                             }
 

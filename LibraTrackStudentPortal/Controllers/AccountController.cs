@@ -18,9 +18,11 @@ namespace LibraTrackStudentPortal.Controllers
         {
             return View();
         }
-        public IActionResult Register()
+
+        public IActionResult Logout()
         {
-            return View();
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "Account");
         }
 
         [HttpPost]
@@ -31,46 +33,36 @@ namespace LibraTrackStudentPortal.Controllers
 
             if (student == null)
             {
-                ViewBag.Error = "ID not found";
+                ViewBag.Error = "ID not found.";
                 return View();
             }
 
-            if (student.password != model.password)
+            if (!student.IsActive)
             {
-                ViewBag.Error = "Wrong password";
+                ViewBag.Error = "Your account has been deactivated. Please contact the librarian.";
                 return View();
+            }
+
+            if (student.passwordHash != model.passwordHash)
+            {
+                ViewBag.Error = "Wrong password.";
+                return View();
+            }
+
+            if (student.IsFirstLogin)
+            {
+                HttpContext.Session.SetString("StudentID", student.ID_no);
+                HttpContext.Session.SetString("StudentName", student.full_name);
+                return RedirectToAction("ForceChangePassword", "Student");
             }
 
             HttpContext.Session.SetString("StudentID", student.ID_no);
+            HttpContext.Session.SetString("StudentName", student.full_name);
 
             return RedirectToAction("Dashboard", "Student");
         }
 
 
-
-
-        [HttpPost]
-        public IActionResult Register(Student student)
-        {
-            if (ModelState.IsValid)
-            {
-                var existing = _context.Students
-                    .FirstOrDefault(s => s.ID_no == student.ID_no);
-
-                if (existing != null)
-                {
-                    ViewBag.Error = "Student ID already registered.";
-                    return View();
-                }
-
-                _context.Students.Add(student);
-                _context.SaveChanges();
-
-                return RedirectToAction("Login");
-            }
-
-            return View(student);
-        }
 
     }
 }
