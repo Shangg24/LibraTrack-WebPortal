@@ -1,4 +1,16 @@
 ﻿@model List<LibraTrackStudentPortal.Models.book>
+@{
+    var requestedBooks = ViewBag.RequestedBooks as List<string>;
+    var borrowedBooks = ViewBag.BorrowedBooks as List<string>;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
 
@@ -30,12 +42,28 @@
             <tr>
                 <td>@book.book_title</td>
                 <td>
-                    <form asp-action="SubmitRequest" method="post">
-                        <input type="hidden" name="bookId" value="@book.id" />
-                        <button type="submit" class="btn btn-success btn-sm">
-                            Request
+                    @if (borrowedBooks != null && borrowedBooks.Contains(book.id))
+                    {
+                        <button class="btn btn-danger btn-sm" disabled title="Return the book first">
+                            Already Borrowed
                         </button>
-                    </form>
+                    }
+                    else if (requestedBooks != null && requestedBooks.Contains(book.id))
+                    {
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Requested
+                        </button>
+                    }
+                    else
+                    {
+                        <form asp-action="SubmitRequest" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="bookId" value="@book.id" />
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Request
+                            </button>
+                        </form>
+                    }
                 </td>
             </tr>
         }

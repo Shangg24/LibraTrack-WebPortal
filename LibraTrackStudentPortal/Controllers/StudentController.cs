@@ -54,7 +54,25 @@ public class StudentController : Controller
 
     public IActionResult RequestBook()
     {
+        var studentId = HttpContext.Session.GetString("StudentID");
+
         var books = _context.books.ToList();
+
+        // existing requested books
+        var requestedBookIds = _context.book_requests
+            .Where(r => r.ID_no == studentId && (r.status == "Pending" || r.status == "Approved"))
+            .Select(r => r.book_id)
+            .ToList();
+
+        // 🔴 NEW: borrowed books
+        var borrowedBookIds = (from i in _context.issues
+                               join ib in _context.issue_books on i.issue_id equals ib.issue_id
+                               where i.ID_no == studentId && ib.status == "Borrowed"
+                               select ib.book_id).ToList();
+
+        ViewBag.RequestedBooks = requestedBookIds;
+        ViewBag.BorrowedBooks = borrowedBookIds; // 👈 ADD THIS
+
         return View(books);
     }
 
@@ -68,7 +86,6 @@ public class StudentController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        // ✅ ADD THIS PART HERE
         var existingRequest = _context.book_requests
             .FirstOrDefault(r => r.book_id == bookId
                               && r.ID_no == studentId
@@ -77,10 +94,9 @@ public class StudentController : Controller
         if (existingRequest != null)
         {
             TempData["SuccessMessage"] = "You already have a pending request for this book.";
-            return RedirectToAction("Dashboard");
+            return RedirectToAction("RequestBook"); // ✅ FIXED
         }
 
-        // ✅ ONLY CREATE REQUEST IF NO DUPLICATE
         var request = new book_requests
         {
             ID_no = studentId,
@@ -94,7 +110,20 @@ public class StudentController : Controller
 
         TempData["SuccessMessage"] = "Your reservation request has been submitted successfully.";
 
-        return RedirectToAction("Dashboard");
+        return RedirectToAction("RequestBook");
+
+        var alreadyBorrowed = (from i in _context.issues
+                               join ib in _context.issue_books on i.issue_id equals ib.issue_id
+                               where i.ID_no == studentId
+                                     && ib.book_id == bookId
+                                     && ib.status == "Borrowed"
+                               select ib).FirstOrDefault();
+
+        if (alreadyBorrowed != null)
+        {
+            TempData["SuccessMessage"] = "You already borrowed this book and have not returned it yet.";
+            return RedirectToAction("RequestBook");
+        }
     }
 
     public IActionResult ForceChangePassword()
