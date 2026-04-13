@@ -86,6 +86,14 @@ public class StudentController : Controller
             return RedirectToAction("Login", "Account");
         }
 
+        var book = _context.books.FirstOrDefault(b => b.id == bookId);
+
+        if (book.available <= 0)
+        {
+            TempData["ErrorMessage"] = "This book is not available.";
+            return RedirectToAction("RequestBook");
+        }
+
         var existingRequest = _context.book_requests
             .FirstOrDefault(r => r.book_id == bookId
                               && r.ID_no == studentId
