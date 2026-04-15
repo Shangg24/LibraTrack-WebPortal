@@ -104,5 +104,19 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (Context.Session.GetString("MustChangePassword") == "true")
+    {
+        <script>
+            document.addEventListener("click", function (e) {
+                if (e.target.tagName === "A") {
+                    e.preventDefault();
+                    window.location.href = "/Student/ForceChangePassword";
+                }
+            });
+        </script>
+    }
+
 </body>
 </html>
+

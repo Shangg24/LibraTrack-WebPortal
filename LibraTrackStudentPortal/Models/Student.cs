@@ -18,5 +18,7 @@ namespace LibraTrackStudentPortal.Models
         public bool IsFirstLogin { get; set; }
 
         public bool IsActive { get; set; }
+
+        public bool MustChangePassword { get; set; }
     }
 }

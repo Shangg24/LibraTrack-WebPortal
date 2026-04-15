@@ -159,20 +159,24 @@ public class StudentController : Controller
             return View();
         }
 
-        var student = _context.Students
-            .FirstOrDefault(s => s.ID_no == studentId);
+        var student = _context.Students.FirstOrDefault(s => s.ID_no == studentId);
 
         if (student == null)
             return RedirectToAction("Login", "Account");
 
-        student.passwordHash = newPassword; // we will hash later
+        // 🔐 UPDATE PASSWORD
+        student.passwordHash = newPassword; // (or hashed version if you use hashing)
+
+        // 🔓 RELEASE FIRST LOGIN RESTRICTION
         student.IsFirstLogin = false;
+        student.MustChangePassword = false;
 
         _context.SaveChanges();
 
-        TempData["SuccessMessage"] = "Password changed successfully.";
+        // 🧠 UPDATE SESSION FLAG
+        HttpContext.Session.SetString("MustChangePassword", "false");
 
-        return RedirectToAction("Dashboard");
+        return RedirectToAction("Dashboard", "Student");
     }
 
     public IActionResult ChangePassword()

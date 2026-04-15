@@ -37,6 +37,8 @@ namespace LibraTrackStudentPortal.Controllers
                 return View();
             }
 
+
+
             if (!student.IsActive)
             {
                 ViewBag.Error = "Your account has been deactivated. Please contact the librarian.";
@@ -53,11 +55,14 @@ namespace LibraTrackStudentPortal.Controllers
             {
                 HttpContext.Session.SetString("StudentID", student.ID_no);
                 HttpContext.Session.SetString("StudentName", student.full_name);
+                HttpContext.Session.SetString("MustChangePassword", "true");
+
                 return RedirectToAction("ForceChangePassword", "Student");
             }
 
             HttpContext.Session.SetString("StudentID", student.ID_no);
             HttpContext.Session.SetString("StudentName", student.full_name);
+            HttpContext.Session.SetString("MustChangePassword", "false");
 
             return RedirectToAction("Dashboard", "Student");
         }
