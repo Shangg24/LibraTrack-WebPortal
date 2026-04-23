@@ -15,10 +15,9 @@
         <!-- Logo -->
         <div class="text-center mb-3">
             <img src="~/images/LibraTrackLogo.png" alt="LibraTrack Logo" style="width:120px;" />
-            <h4 class="mt-2">LibraTrack Student Portal</h4>
+            <h4 class="mt-2">LibraTrack System Login</h4>
         </div>
 
-        @model Student
 
         @if (ViewBag.Error != null)
         {
@@ -30,15 +29,15 @@
         <form asp-action="Login" method="post">
 
             <div class="mb-3">
-                <label class="form-label">Student Number</label>
-                <input asp-for="ID_no" class="form-control" placeholder="Enter Student Number" required />
+                <label class="form-label">Username / Student ID</label>
+                <input name="username" class="form-control" placeholder="Enter Username or Student ID" />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Password</label>
 
                 <div class="input-group">
-                    <input asp-for="passwordHash"
+                    <input name="password"
                            type="password"
                            id="passwordInput"
                            class="form-control"
@@ -47,8 +46,7 @@
 
                     <button class="btn btn-outline-secondary"
                             type="button"
-                            onclick="
-togglePassword()">
+                            onclick="togglePassword()">
 
                         <i id="toggleIcon" class="bi bi-eye-slash"></i>
                     </button>
@@ -59,6 +57,12 @@ togglePassword()">
                 <button type="submit" class="btn btn-primary">
                     Login
                 </button>
+
+                <p class="text-center mt-3" style="font-size: 13px; color: gray;">
+                    <strong>Students:</strong> Use your Student ID<br />
+                    <strong>Librarian/Admin:</strong> Use your assigned username
+                </p>
+
                 <div style="margin-top:10px; font-size:14px; color:gray; text-align:center;">
                     Forgot your password? <br /> Please contact the librarian or IT staff to reset your account.
                 </div>

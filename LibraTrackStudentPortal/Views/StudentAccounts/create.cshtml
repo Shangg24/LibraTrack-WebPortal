@@ -1,0 +1,134 @@
+﻿@model LibraTrackStudentPortal.Models.Student
+
+@{
+    ViewData["Title"] = "Create Student Account";
+}
+
+<div class="container py-4 d-flex justify-content-center">
+    <div style="width: 100%; max-width: 700px;">
+
+        <div class="form-page-header mb-4 text-center">
+            <h2 class="fw-bold mb-1">Create Student Account</h2>
+            <p class="text-muted mb-0">Add a new student account for library access.</p>
+        </div>
+
+        <div class="form-card">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger mb-4">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <form asp-action="Create" method="post">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Student ID Number</label>
+                        <input asp-for="ID_no" class="form-control modern-input" placeholder="e.g. CS000001" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Full Name</label>
+                        <input asp-for="full_name" class="form-control modern-input" placeholder="Enter full name" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input asp-for="email" type="email" class="form-control modern-input" placeholder="e.g. student@email.com" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Temporary Password</label>
+                        <input type="password" name="plainPassword" class="form-control modern-input" placeholder="Enter temporary password" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Grade Level / Section</label>
+                        <select asp-for="grade_section" class="form-select modern-input"
+                                asp-items="ViewBag.GradeSections">
+                            <option value="">Select grade and section</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Status</label>
+                        <input value="Active" class="form-control modern-input readonly-input" readonly />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">First Login</label>
+                        <input value="Password change required" class="form-control modern-input readonly-input" readonly />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4 justify-content-center">
+                    <button type="submit" class="btn save-btn">Create Account</button>
+                    <a asp-action="Index" class="btn cancel-btn">Back</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .form-page-header h2 {
+        color: #4a0f1d;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .modern-input {
+        border-radius: 14px;
+        border: 1px solid #e7c8cf;
+        padding: 12px 14px;
+        box-shadow: none;
+    }
+
+        .modern-input:focus {
+            border-color: #8b1028;
+            box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
+        }
+
+    .readonly-input {
+        background: #f9f1f3;
+        color: #6d1023;
+        font-weight: 600;
+    }
+
+    .save-btn {
+        background: #8b1028;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .save-btn:hover {
+            background: #6d1023;
+            color: #ffffff;
+        }
+
+    .cancel-btn {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .cancel-btn:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+</style>

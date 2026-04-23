@@ -1,0 +1,567 @@
+﻿@model IEnumerable<LibraTrackStudentPortal.Models.ReturnTransactionViewModel>
+
+@{
+    ViewData["Title"] = "Process Returns";
+    var totalBorrowedTransactions = ViewBag.TotalBorrowedTransactions ?? 0;
+    var totalBorrowedBooks = ViewBag.TotalBorrowedBooks ?? 0;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Process Returns</h2>
+            <p class="text-muted mb-0">Manage borrowed book transactions and process returns.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="summary-card">
+                <div class="summary-label">Borrowed Transactions</div>
+                <div class="summary-value">@totalBorrowedTransactions</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="summary-card">
+                <div class="summary-label">Borrowed Books</div>
+                <div class="summary-value" style="color:#6d28d9;">@totalBorrowedBooks</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-tools mb-3">
+        <div class="search-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text"
+                   id="searchInput"
+                   class="form-control search-input"
+                   placeholder="Search transaction..." />
+        </div>
+    </div>
+
+    <div class="modern-table-card">
+        <div class="table-responsive">
+            <table class="table modern-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Issue ID</th>
+                        <th>Student ID</th>
+                        <th>Issue Date</th>
+                        <th>Due / Return Date</th>
+                        <th>No. of Books</th>
+                        <th>Borrow Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var status = item.Status?.Trim().ToLower();
+                        var safeId = ("iss_" + (item.IssueId ?? "unknown")).Replace("-", "_");
+
+                        <tr class="clickable-row @(item.ReturnIndicator == "Overdue" ? "overdue-row" : "")" onclick="toggleDetails('@safeId')">
+                            <td class="fw-semibold">@item.IssueId</td>
+                            <td>@item.StudentID</td>
+                            <td>@item.IssueDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td>@item.ReturnDate.ToString("MMM dd, yyyy")</td>
+                            <td>@item.BookCount</td>
+                            <td>
+                                @if (item.ReturnIndicator == "Overdue")
+                                {
+                                    <span class="status-badge overdue-badge">Overdue</span>
+                                }
+                                else if (item.ReturnIndicator == "Due Soon")
+                                {
+                                    <span class="status-badge due-soon-badge">Due Soon</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge on-time-badge">On Time</span>
+                                }
+                            </td>
+                            <td class="text-center" onclick="event.stopPropagation();">
+                                <a href="#"
+                                   class="btn action-btn btn-return"
+                                   onclick="showConfirmModal('Process return for transaction @item.IssueId?', '@Url.Action("ProcessReturn", new { issueId = item.IssueId })')">
+                                    Mark as Returned
+                                </a>
+                            </td>
+                        </tr>
+
+                        <tr id="details-@safeId" class="detail-row" style="display:none;">
+                            <td colspan="7">
+                                <div class="detail-card">
+                                    <div class="row mb-3 detail-info">
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Issue ID:</strong> @item.IssueId</div>
+                                            <div class="info-line"><strong>Student ID:</strong> @item.StudentID</div>
+                                            <div class="info-line"><strong>Full Name:</strong> @item.StudentName</div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Issue Date:</strong> @item.IssueDate.ToString("MMM dd, yyyy hh:mm tt")</div>
+                                            <div class="info-line"><strong>Due / Return Date:</strong> @item.ReturnDate.ToString("MMM dd, yyyy")</div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Return Indicator:</strong></div>
+                                            <div class="info-line">
+                                                @if (item.ReturnIndicator == "Overdue")
+                                                {
+                                                    <span class="status-badge overdue-badge">Overdue (@item.DaysOverdue day(s))</span>
+                                                }
+                                                else if (item.ReturnIndicator == "Due Soon")
+                                                {
+                                                    <span class="status-badge due-soon-badge">Due Soon</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status-badge on-time-badge">On Time</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm detail-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Book ID</th>
+                                                    <th>Book Title</th>
+                                                    <th>Author</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var book in item.Books)
+                                                {
+                                                    <tr>
+                                                        <td>@book.BookId</td>
+                                                        <td>@book.BookTitle</td>
+                                                        <td>@book.Author</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmBtn" class="btn btn-danger">Yes, Proceed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", "Returns", new { page = ViewBag.CurrentPage - 1 })" class="btn page-btn">
+                Previous
+            </a>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="btn page-btn active-page">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Returns", new { page = i })" class="btn page-btn">
+                    @i
+                </a>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", "Returns", new { page = ViewBag.CurrentPage + 1 })" class="btn page-btn">
+                Next
+            </a>
+        }
+    </div>
+}
+
+@if (((List<LibraTrackStudentPortal.Models.ReturnTransactionViewModel>)ViewBag.CompletedTransactions).Any())
+{
+    <div class="modern-table-card mt-4">
+        <div class="p-4 pb-0">
+            <h5 class="fw-bold mb-1">Return History</h5>
+            <p class="text-muted mb-3">Previously completed return transactions.</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table modern-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Issue ID</th>
+                        <th>Student ID</th>
+                        <th>Issue Date</th>
+                        <th>Returned Date</th>
+                        <th>No. of Books</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in (List<LibraTrackStudentPortal.Models.ReturnTransactionViewModel>)ViewBag.CompletedTransactions)
+                    {
+                        var historySafeId = ("hist_" + (item.IssueId ?? "unknown")).Replace("-", "_");
+
+                        <tr class="clickable-row" onclick="toggleDetails('@historySafeId')">
+                            <td class="fw-semibold">@item.IssueId</td>
+                            <td>@item.StudentID</td>
+                            <td>@item.IssueDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td>@item.ReturnDate.ToString("MMM dd, yyyy")</td>
+                            <td>@item.BookCount</td>
+                            <td>
+                                <span class="status-badge on-time-badge">Returned</span>
+                            </td>
+                        </tr>
+
+                        <tr id="details-@historySafeId" class="detail-row" style="display:none;">
+                            <td colspan="6">
+                                <div class="detail-card">
+                                    <div class="row mb-3 detail-info">
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Issue ID:</strong> @item.IssueId</div>
+                                            <div class="info-line"><strong>Student ID:</strong> @item.StudentID</div>
+                                            <div class="info-line"><strong>Full Name:</strong> @item.StudentName</div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Issue Date:</strong> @item.IssueDate.ToString("MMM dd, yyyy hh:mm tt")</div>
+                                            <div class="info-line"><strong>Returned Date:</strong> @item.ReturnDate.ToString("MMM dd, yyyy")</div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="info-line"><strong>Status:</strong></div>
+                                            <div class="info-line">
+                                                <span class="status-badge on-time-badge">Returned</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm detail-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Book ID</th>
+                                                    <th>Book Title</th>
+                                                    <th>Author</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var book in item.Books)
+                                                {
+                                                    <tr>
+                                                        <td>@book.BookId</td>
+                                                        <td>@book.BookTitle</td>
+                                                        <td>@book.Author</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (ViewBag.TotalHistoryPages > 1)
+{
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+        @if (ViewBag.HistoryPage > 1)
+        {
+            <a href="@Url.Action("Index", "Returns", new { page = ViewBag.CurrentPage, historyPage = ViewBag.HistoryPage - 1 })" class="btn page-btn">
+                Previous
+            </a>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalHistoryPages; i++)
+        {
+            if (i == ViewBag.HistoryPage)
+            {
+                <span class="btn page-btn active-page">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Returns", new { page = ViewBag.CurrentPage, historyPage = i })" class="btn page-btn">
+                    @i
+                </a>
+            }
+        }
+
+        @if (ViewBag.HistoryPage < ViewBag.TotalHistoryPages)
+        {
+            <a href="@Url.Action("Index", "Returns", new { page = ViewBag.CurrentPage, historyPage = ViewBag.HistoryPage + 1 })" class="btn page-btn">
+                Next
+            </a>
+        }
+    </div>
+}
+
+<style>
+    .summary-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 8px 24px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        height: 100%;
+    }
+
+    .summary-label {
+        font-size: 0.95rem;
+        color: #7a4b55;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4a0f1d;
+    }
+
+    .table-tools {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .search-wrap {
+        position: relative;
+        width: 320px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b1028;
+        font-size: 0.95rem;
+    }
+
+    .search-input {
+        border-radius: 14px;
+        border: 1px solid #e7c8cf;
+        padding: 12px 14px 12px 40px;
+        min-height: 48px;
+        box-shadow: 0 4px 14px rgba(60, 10, 18, 0.05);
+        background: #fffdfd;
+    }
+
+        .search-input:focus {
+            border-color: #8b1028;
+            box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
+        }
+
+    .modern-table-card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        overflow: hidden;
+    }
+
+    .modern-table thead th {
+        background: #f7e6ea;
+        color: #4a0f1d;
+        font-weight: 800;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e8c8cf;
+        padding: 18px 14px;
+    }
+
+    .modern-table tbody td {
+        padding: 18px 14px;
+        border-color: #f6ecef;
+        vertical-align: middle;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #fff8f9;
+        cursor: pointer;
+    }
+
+    .detail-row td {
+        background: #fffafb;
+    }
+
+    .detail-card {
+        background: #fffdfd;
+        border: 1px solid #f1d9de;
+        border-radius: 16px;
+        padding: 18px;
+    }
+
+    .detail-table thead th {
+        background: #fdf1f3;
+        color: #6d1023;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .borrowed-badge {
+        background: rgba(139, 92, 246, 0.15);
+        color: #6d28d9;
+    }
+
+    .inactive-badge {
+        background: rgba(109, 16, 35, 0.12);
+        color: #8b1028;
+    }
+
+    .action-btn {
+        min-width: 140px;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border: none;
+    }
+
+    .btn-return {
+        background: #8b1028;
+        color: white;
+    }
+
+        .btn-return:hover {
+            background: #6d1023;
+            color: white;
+        }
+
+    .detail-info .info-line {
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .detail-info .col-md-4 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .overdue-row td {
+        background: rgba(220, 38, 38, 0.08) !important;
+    }
+
+    .overdue-badge {
+        background: rgba(220, 38, 38, 0.12);
+        color: #b91c1c;
+    }
+
+    .due-soon-badge {
+        background: rgba(245, 158, 11, 0.15);
+        color: #b45309;
+    }
+
+    .on-time-badge {
+        background: rgba(34, 197, 94, 0.12);
+        color: #15803d;
+    }
+
+    .page-btn {
+        border: 1px solid #e7c8cf;
+        background: #ffffff;
+        color: #6d1023;
+        border-radius: 10px;
+        min-width: 44px;
+        font-weight: 600;
+        padding: 8px 14px;
+    }
+
+        .page-btn:hover {
+            background: #f9f1f3;
+            color: #4a0f1d;
+        }
+
+    .active-page {
+        background: #8b1028 !important;
+        color: #ffffff !important;
+        border-color: #8b1028 !important;
+        cursor: default;
+    }
+
+</style>
+
+<script>
+    function showConfirmModal(message, url) {
+        document.getElementById("confirmMessage").innerText = message;
+        document.getElementById("confirmBtn").setAttribute("href", url);
+
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    function toggleDetails(id) {
+        const row = document.getElementById("details-" + id);
+        if (row.style.display === "none") {
+            row.style.display = "table-row";
+        } else {
+            row.style.display = "none";
+        }
+    }
+
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll(".clickable-row");
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            let detailRow = document.getElementById("details-" + ((row.cells[0].innerText || "").replace("-", "_")));
+
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+                if (detailRow) detailRow.style.display = "none";
+            }
+        });
+    });
+</script>

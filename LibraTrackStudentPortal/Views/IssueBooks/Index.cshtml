@@ -1,22 +1,18 @@
-﻿@model IEnumerable<LibraTrackStudentPortal.Models.book>
+﻿@model IEnumerable<LibraTrackStudentPortal.Models.IssueTransactionViewModel>
 
 @{
-    ViewData["Title"] = "Manage Books";
-    var totalBooks = ViewBag.TotalBooks ?? 0;
-    var availableBooks = ViewBag.AvailableBooks ?? 0;
-    var unavailableBooks = ViewBag.UnavailableBooks ?? 0;
+    ViewData["Title"] = "Issue Books";
+    var totalTransactionsReady = ViewBag.TotalTransactionsReady ?? 0;
+    var totalReservedBooks = ViewBag.TotalReservedBooks ?? 0;
+    var nextIssueId = ViewBag.NextIssueId ?? "I-0001";
 }
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1">Manage Books</h2>
-            <p class="text-muted mb-0">View and manage the library book collection.</p>
+            <h2 class="fw-bold mb-1">Issue Books</h2>
+            <p class="text-muted mb-0">Issue all reserved books of a student in one transaction.</p>
         </div>
-
-        <a asp-action="Create" class="btn create-btn">
-            + Add Book
-        </a>
     </div>
 
     @if (TempData["Success"] != null)
@@ -30,33 +26,32 @@
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="summary-card">
-                <div class="summary-label">Total Books</div>
-                <div class="summary-value">@totalBooks</div>
+                <div class="summary-label">Students Ready for Issue</div>
+                <div class="summary-value">@totalTransactionsReady</div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="summary-card">
-                <div class="summary-label">Available</div>
-                <div class="summary-value text-success">@availableBooks</div>
+                <div class="summary-label">Reserved Books</div>
+                <div class="summary-value text-primary">@totalReservedBooks</div>
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="summary-card">
-                <div class="summary-label">Unavailable</div>
-                <div class="summary-value text-danger">@unavailableBooks</div>
+                <div class="summary-label">Next Transaction ID</div>
+                <div class="summary-value">@nextIssueId</div>
             </div>
         </div>
     </div>
 
     <div class="table-tools mb-3">
         <div class="search-wrap">
-            <i class="bi bi-search search-icon"></i>
             <input type="text"
                    id="searchInput"
                    class="form-control search-input"
-                   placeholder="Search book..." />
+                   placeholder="Search student..." />
         </div>
     </div>
 
@@ -65,63 +60,71 @@
             <table class="table modern-table align-middle mb-0">
                 <thead>
                     <tr>
-                        <th>Book ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Available</th>
-                        <th>Status</th>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Reserved Books</th>
+                        <th>Book Titles</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var book in Model)
+                    @foreach (var item in Model)
                     {
-                        var safeId = ("book_" + (book.id ?? "unknown")).Replace("-", "_");
-                        var status = (book.status ?? "").Trim().ToLower();
+                        var safeId = ("iss_" + (item.StudentID ?? "unknown")).Replace("-", "_");
 
                         <tr class="clickable-row" onclick="toggleDetails('@safeId')">
-                            <td class="fw-semibold">@book.id</td>
-                            <td>@book.book_title</td>
-                            <td>@book.author</td>
-                            <td>@book.available / @book.Copies</td>
-                            <td>
-                                @if (status == "available")
-                                {
-                                    <span class="status-badge active-badge">Available</span>
-                                }
-                                else
-                                {
-                                    <span class="status-badge inactive-badge">Not Available</span>
-                                }
-                            </td>
+                            <td class="fw-semibold">@item.StudentID</td>
+                            <td>@item.StudentName</td>
+                            <td>@item.ReservedCount</td>
+                            <td>@string.Join(", ", item.Books.Select(b => b.BookTitle))</td>
                             <td class="text-center" onclick="event.stopPropagation();">
-                                <a asp-action="Edit" asp-route-id="@book.id" class="btn action-btn btn-edit">
-                                    Edit
+                                <a href="#"
+                                   class="btn action-btn btn-issue"
+                                   onclick="showConfirmModal('Issue all reserved books for this student in one transaction?', '@Url.Action("ProcessIssue", new { id = item.StudentID })')">
+                                    Issue Transaction
                                 </a>
                             </td>
                         </tr>
 
                         <tr id="details-@safeId" class="detail-row" style="display:none;">
-                            <td colspan="6">
+                            <td colspan="5">
                                 <div class="detail-card">
+
                                     <div class="row mb-3 detail-info">
                                         <div class="col-md-6">
-                                            <div class="info-line"><strong>Book ID:</strong> @book.id</div>
-                                            <div class="info-line"><strong>Title:</strong> @book.book_title</div>
-                                            <div class="info-line"><strong>Author:</strong> @book.author</div>
-                                            <div class="info-line"><strong>Published Date:</strong> @(book.published_date?.ToString("MMM dd, yyyy") ?? "-")</div>
-                                            <div class="info-line"><strong>Category:</strong> @book.category</div>
+                                            <div class="info-line"><strong>Student ID:</strong> @item.StudentID</div>
+                                            <div class="info-line"><strong>Student Name:</strong> @item.StudentName</div>
+                                            <div class="info-line"><strong>Grade / Section:</strong> @item.GradeSection</div>
                                         </div>
 
                                         <div class="col-md-6">
-                                            <div class="info-line"><strong>ISBN:</strong> @book.ISBN</div>
-                                            <div class="info-line"><strong>Shelf:</strong> @book.shelf</div>
-                                            <div class="info-line"><strong>Total Copies:</strong> @book.Copies</div>
-                                            <div class="info-line"><strong>Available Copies:</strong> @book.available</div>
-                                            <div class="info-line"><strong>Status:</strong> @book.status</div>
-                                            <div class="info-line"><strong>Date Added:</strong> @(book.date_insert?.ToString("MMM dd, yyyy") ?? "-")</div>
+                                            <div class="info-line"><strong>Email:</strong> @item.StudentEmail</div>
+                                            <div class="info-line"><strong>Request No(s):</strong> @string.Join(", ", item.RequestNos)</div>
                                         </div>
                                     </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm detail-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Book ID</th>
+                                                    <th>Book Title</th>
+                                                    <th>Author</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var book in item.Books)
+                                                {
+                                                    <tr>
+                                                        <td>@book.BookId</td>
+                                                        <td>@book.BookTitle</td>
+                                                        <td>@book.Author</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
                                 </div>
                             </td>
                         </tr>
@@ -132,12 +135,33 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmBtn" class="btn btn-danger">Yes, Proceed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (ViewBag.TotalPages > 1)
 {
     <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
         @if (ViewBag.CurrentPage > 1)
         {
-            <a href="@Url.Action("Index", "Books", new { page = ViewBag.CurrentPage - 1 })" class="btn page-btn">
+            <a href="@Url.Action("Index", "IssueBooks", new { page = ViewBag.CurrentPage - 1 })" class="btn page-btn">
                 Previous
             </a>
         }
@@ -150,7 +174,7 @@
             }
             else
             {
-                <a href="@Url.Action("Index", "Books", new { page = i })" class="btn page-btn">
+                <a href="@Url.Action("Index", "IssueBooks", new { page = i })" class="btn page-btn">
                     @i
                 </a>
             }
@@ -158,7 +182,7 @@
 
         @if (ViewBag.CurrentPage < ViewBag.TotalPages)
         {
-            <a href="@Url.Action("Index", "Books", new { page = ViewBag.CurrentPage + 1 })" class="btn page-btn">
+            <a href="@Url.Action("Index", "IssueBooks", new { page = ViewBag.CurrentPage + 1 })" class="btn page-btn">
                 Next
             </a>
         }
@@ -186,20 +210,6 @@
         color: #4a0f1d;
     }
 
-    .create-btn {
-        background: #6d1023;
-        color: #ffffff;
-        border-radius: 12px;
-        padding: 10px 18px;
-        font-weight: 600;
-        border: none;
-    }
-
-        .create-btn:hover {
-            background: #56101d;
-            color: #ffffff;
-        }
-
     .table-tools {
         display: flex;
         justify-content: flex-end;
@@ -211,19 +221,10 @@
         width: 320px;
     }
 
-    .search-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #8b1028;
-        font-size: 0.95rem;
-    }
-
     .search-input {
         border-radius: 14px;
         border: 1px solid #e7c8cf;
-        padding: 12px 14px 12px 40px;
+        padding: 12px 14px;
         min-height: 48px;
         box-shadow: 0 4px 14px rgba(60, 10, 18, 0.05);
         background: #fffdfd;
@@ -273,44 +274,32 @@
         padding: 18px;
     }
 
-    .detail-info .info-line {
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 8px 14px;
-        border-radius: 999px;
-        font-size: 0.85rem;
+    .detail-table thead th {
+        background: #fdf1f3;
+        color: #6d1023;
         font-weight: 700;
     }
 
-    .active-badge {
-        background: rgba(34, 197, 94, 0.12);
-        color: #15803d;
-    }
-
-    .inactive-badge {
-        background: rgba(109, 16, 35, 0.12);
-        color: #8b1028;
-    }
+    .detail-info .info-line {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
 
     .action-btn {
-        min-width: 100px;
+        min-width: 140px;
         border-radius: 12px;
         font-weight: 600;
         padding: 8px 14px;
         border: none;
     }
 
-    .btn-edit {
-        background: #d97706;
+    .btn-issue {
+        background: #8b1028;
         color: white;
     }
 
-        .btn-edit:hover {
-            background: #b45309;
+        .btn-issue:hover {
+            background: #6d1023;
             color: white;
         }
 
@@ -338,9 +327,15 @@
 
 </style>
 
-
-
 <script>
+    function showConfirmModal(message, url) {
+        document.getElementById("confirmMessage").innerText = message;
+        document.getElementById("confirmBtn").setAttribute("href", url);
+
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
     function toggleDetails(id) {
         const row = document.getElementById("details-" + id);
         if (!row) return;
@@ -358,7 +353,7 @@
 
         rows.forEach(row => {
             let text = row.innerText.toLowerCase();
-            let safeId = ("book_" + ((row.cells[0].innerText || "").trim())).replace(/-/g, "_");
+            let safeId = ("iss_" + ((row.cells[0].innerText || "").trim())).replace(/-/g, "_");
             let detailRow = document.getElementById("details-" + safeId);
 
             if (text.includes(filter)) {

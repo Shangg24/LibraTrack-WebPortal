@@ -8,9 +8,7 @@
     </div>
 }
 
-
 <div class="text-center mb-4">
-
     <h2 class="fw-bold">
         Student Dashboard
     </h2>
@@ -18,18 +16,14 @@
     <p class="text-muted fs-5">
         Welcome, @Context.Session.GetString("StudentName")
     </p>
-
 </div>
 
 <br />
 <br />
 
-<!--<a asp-controller="Student" asp-action="ChangePassword">Change Password</a>-->
-
 <h3>My Borrowed Books</h3>
 
 <div class="row mb-4">
-
     <div class="col-md-4">
         <div class="card text-white bg-primary dashboard-card">
             <div class="card-body text-center">
@@ -56,15 +50,13 @@
             </div>
         </div>
     </div>
-
 </div>
-
 
 <div class="row mt-4">
 
     <!-- LEFT COLUMN -->
     <div class="col-md-6">
-        <div class="card shadow">
+        <div class="card shadow h-100">
             <div class="card-header bg-warning text-white">
                 <h5 class="mb-0">Currently Borrowed</h5>
             </div>
@@ -88,7 +80,6 @@
                                 && item.ReturnDate.Date < DateTime.Now.Date;
 
                                 <tr class="@(isOverdue ? "table-danger" : "")">
-
                                     <td class="text-start fw-semibold">
                                         @item.BookTitle
                                     </td>
@@ -106,10 +97,8 @@
                                             <span class="badge bg-danger">Overdue</span>
                                         }
                                     </td>
-
                                 </tr>
                             }
-
                         }
                         else
                         {
@@ -120,14 +109,46 @@
                     </tbody>
                 </table>
 
+                @if (ViewBag.TotalCurrentPages > 1)
+                {
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <a href="@Url.Action("Dashboard", "Student", new { currentPage = ViewBag.CurrentPage - 1, historyPage = ViewBag.HistoryPage })" class="btn page-btn">
+                                Previous
+                            </a>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalCurrentPages; i++)
+                        {
+                            if (i == ViewBag.CurrentPage)
+                            {
+                                <span class="btn page-btn active-page">@i</span>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Dashboard", "Student", new { currentPage = i, historyPage = ViewBag.HistoryPage })" class="btn page-btn">
+                                    @i
+                                </a>
+                            }
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalCurrentPages)
+                        {
+                            <a href="@Url.Action("Dashboard", "Student", new { currentPage = ViewBag.CurrentPage + 1, historyPage = ViewBag.HistoryPage })" class="btn page-btn">
+                                Next
+                            </a>
+                        }
+                    </div>
+                }
+
             </div>
         </div>
     </div>
 
-
     <!-- RIGHT COLUMN -->
     <div class="col-md-6">
-        <div class="card shadow">
+        <div class="card shadow h-100">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0">Borrowing History</h5>
             </div>
@@ -173,7 +194,6 @@
                                     </td>
                                 </tr>
                             }
-
                         }
                         else
                         {
@@ -184,12 +204,65 @@
                     </tbody>
                 </table>
 
+                @if (ViewBag.TotalHistoryPages > 1)
+                {
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-3 flex-wrap">
+                        @if (ViewBag.HistoryPage > 1)
+                        {
+                            <a href="@Url.Action("Dashboard", "Student", new { currentPage = ViewBag.CurrentPage, historyPage = ViewBag.HistoryPage - 1 })" class="btn page-btn">
+                                Previous
+                            </a>
+                        }
+
+                        @for (int i = 1; i <= ViewBag.TotalHistoryPages; i++)
+                        {
+                            if (i == ViewBag.HistoryPage)
+                            {
+                                <span class="btn page-btn active-page">@i</span>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("Dashboard", "Student", new { currentPage = ViewBag.CurrentPage, historyPage = i })" class="btn page-btn">
+                                    @i
+                                </a>
+                            }
+                        }
+
+                        @if (ViewBag.HistoryPage < ViewBag.TotalHistoryPages)
+                        {
+                            <a href="@Url.Action("Dashboard", "Student", new { currentPage = ViewBag.CurrentPage, historyPage = ViewBag.HistoryPage + 1 })" class="btn page-btn">
+                                Next
+                            </a>
+                        }
+                    </div>
+                }
+
             </div>
         </div>
     </div>
 
 </div>
 
+<style>
+    .page-btn {
+        border: 1px solid #e7c8cf;
+        background: #ffffff;
+        color: #6d1023;
+        border-radius: 10px;
+        min-width: 44px;
+        font-weight: 600;
+        padding: 8px 14px;
+    }
 
+        .page-btn:hover {
+            background: #f9f1f3;
+            color: #4a0f1d;
+        }
 
-
+    .active-page {
+        background: #8b1028 !important;
+        color: #ffffff !important;
+        border-color: #8b1028 !important;
+        cursor: default;
+    }
+</style>

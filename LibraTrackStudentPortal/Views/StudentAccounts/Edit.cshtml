@@ -1,0 +1,93 @@
+﻿@model LibraTrackStudentPortal.Models.Student
+
+@{
+    ViewData["Title"] = "Edit Student Account";
+}
+
+<div class="container py-4 d-flex justify-content-center">
+    <div style="width: 100%; max-width: 700px;">
+
+        <div class="form-page-header mb-4 text-center">
+            <h2 class="fw-bold mb-1">Edit Student Account</h2>
+            <p class="text-muted mb-0">Update student account details.</p>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Edit" method="post">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Student ID Number</label>
+                        <input asp-for="ID_no" class="form-control modern-input readonly-input" readonly />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Full Name</label>
+                        <input asp-for="full_name" class="form-control modern-input" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input asp-for="email" class="form-control modern-input" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Contact</label>
+                        <input asp-for="contact" class="form-control modern-input" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Grade Level / Section</label>
+                        <select asp-for="grade_section" class="form-select modern-input"
+                                asp-items="ViewBag.GradeSections">
+                            <option value="">Select grade and section</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Account Status</label>
+                        <select asp-for="IsActive" class="form-select modern-input">
+                            <option value="true">Active</option>
+                            <option value="false">Deactivated</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4 justify-content-center">
+                    <button type="submit" class="btn save-btn">Save Changes</button>
+                    <a asp-action="Index" class="btn cancel-btn">Back</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .save-btn {
+        background: #8b1028;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .save-btn:hover {
+            background: #6d1023;
+            color: #ffffff;
+        }
+
+    .cancel-btn {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .cancel-btn:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+</style>

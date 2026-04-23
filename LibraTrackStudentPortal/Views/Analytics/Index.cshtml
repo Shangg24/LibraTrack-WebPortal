@@ -1,0 +1,467 @@
+﻿@model LibraTrackStudentPortal.Models.PredictiveAnalyticsViewModel
+
+@{
+    ViewData["Title"] = "Predictive Analytics";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Predictive Analytics</h2>
+        <p class="text-muted mb-0">Analyze borrowing trends, demand levels, and books that may need restocking.</p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Borrowed Transactions</div>
+                <div class="summary-value">@Model.TotalBorrowedTransactions</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Requested Books</div>
+                <div class="summary-value">@Model.TotalRequestedBooks</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Low Stock Books</div>
+                <div class="summary-value text-danger">@Model.LowStockBooks</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Most Borrowed Category</div>
+                <div class="summary-value small-value">@Model.MostBorrowedCategory</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="modern-card chart-card">
+                <div class="chart-header">
+                    <h5 class="fw-bold mb-1">Top Borrowed Books</h5>
+                    <p class="chart-subtitle mb-0">
+                        Shows which books were borrowed the most based on borrowing history.
+                    </p>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="borrowedChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="modern-card chart-card">
+                <div class="chart-header">
+                    <h5 class="fw-bold mb-1">Top Requested Books</h5>
+                    <p class="chart-subtitle mb-0">
+                        Shows which books students request most often before borrowing.
+                    </p>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="requestedChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-tools mt-4 mb-3">
+        <div class="analytics-search-form">
+            <div class="search-wrap analytics-search-wrap">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text"
+                       id="analyticsSearchInput"
+                       class="form-control search-input"
+                       placeholder="Search demand alert..." />
+            </div>
+        </div>
+    </div>
+
+    <div class="modern-card mt-4">
+        <h5 class="fw-bold mb-3">Demand Alerts</h5>
+        <p class="chart-subtitle mb-3">
+            Books marked as High Demand may need restocking or closer monitoring.
+        </p>
+        <div class="table-responsive">
+            <table class="table modern-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Book ID</th>
+                        <th>Book Title</th>
+                        <th>Requests</th>
+                        <th>Borrows</th>
+                        <th>Available</th>
+                        <th>Demand Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.DemandAlerts)
+                    {
+                        <tr class="demand-alert-row">
+                            <td>@item.BookId</td>
+                            <td>@item.BookTitle</td>
+                            <td>@item.RequestCount</td>
+                            <td>@item.BorrowCount</td>
+                            <td>@item.AvailableCopies</td>
+                            <td>
+                                @if (item.DemandLevel == "High Demand")
+                                {
+                                    <span class="status-badge danger-badge">High Demand</span>
+                                }
+                                else if (item.DemandLevel == "Monitor")
+                                {
+                                    <span class="status-badge warning-badge">Monitor</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge stable-badge">Stable</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.TotalAlertsPages > 1)
+{
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+
+        @if (ViewBag.AlertsPage > 1)
+        {
+            <a href="@Url.Action("Index", "Analytics", new { alertsPage = ViewBag.AlertsPage - 1 })"
+               class="btn page-btn">
+                Previous
+            </a>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalAlertsPages; i++)
+        {
+            if (i == ViewBag.AlertsPage)
+            {
+                <span class="btn page-btn active-page">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Analytics", new { alertsPage = i })"
+                   class="btn page-btn">
+                    @i
+                </a>
+            }
+        }
+
+        @if (ViewBag.AlertsPage < ViewBag.TotalAlertsPages)
+        {
+            <a href="@Url.Action("Index", "Analytics", new { alertsPage = ViewBag.AlertsPage + 1 })"
+               class="btn page-btn">
+                Next
+            </a>
+        }
+
+    </div>
+}
+
+<style>
+    .summary-card, .modern-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+    }
+
+    .summary-label {
+        font-size: 0.95rem;
+        color: #7a4b55;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4a0f1d;
+    }
+
+    .small-value {
+        font-size: 1.1rem;
+        line-height: 1.4;
+    }
+
+    .modern-table thead th {
+        background: #f7e6ea;
+        color: #4a0f1d;
+        font-weight: 800;
+        border-bottom: 1px solid #e8c8cf;
+        padding: 14px 12px;
+    }
+
+    .modern-table tbody td {
+        padding: 14px 12px;
+        border-color: #f6ecef;
+        vertical-align: middle;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .danger-badge {
+        background: rgba(220, 38, 38, 0.12);
+        color: #b91c1c;
+    }
+
+    .warning-badge {
+        background: rgba(245, 158, 11, 0.15);
+        color: #b45309;
+    }
+
+    .stable-badge {
+        background: rgba(34, 197, 94, 0.12);
+        color: #15803d;
+    }
+
+    .chart-card {
+        min-height: 420px;
+    }
+
+    .chart-header {
+        margin-bottom: 14px;
+    }
+
+    .chart-subtitle {
+        color: #7a4b55;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .chart-wrap {
+        position: relative;
+        height: 280px;
+        width: 100%;
+    }
+
+    .page-btn {
+        border: 1px solid #e7c8cf;
+        background: #ffffff;
+        color: #6d1023;
+        border-radius: 10px;
+        min-width: 44px;
+        font-weight: 600;
+        padding: 8px 14px;
+    }
+
+        .page-btn:hover {
+            background: #f9f1f3;
+            color: #4a0f1d;
+        }
+
+    .active-page {
+        background: #8b1028 !important;
+        color: #ffffff !important;
+        border-color: #8b1028 !important;
+        cursor: default;
+    }
+
+    .table-tools {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .analytics-search-form {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .analytics-search-wrap {
+        position: relative;
+        width: 320px;
+        max-width: 100%;
+    }
+
+    .search-wrap {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b1028;
+        font-size: 0.95rem;
+        z-index: 2;
+    }
+
+    .search-input {
+        border-radius: 14px;
+        border: 1px solid #e7c8cf;
+        padding: 12px 14px 12px 40px;
+        min-height: 48px;
+        box-shadow: 0 4px 14px rgba(60, 10, 18, 0.05);
+        background: #fffdfd;
+    }
+
+        .search-input:focus {
+            border-color: #8b1028;
+            box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
+        }
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const borrowedLabels = [
+        @foreach (var book in Model.TopBorrowedBooks)
+        {
+                <text>"@book.BookTitle",</text>
+        }
+    ];
+
+    const borrowedData = [
+        @foreach (var book in Model.TopBorrowedBooks)
+        {
+                <text>@book.Count,</text>
+        }
+    ];
+
+    const requestedLabels = [
+        @foreach (var book in Model.TopRequestedBooks)
+        {
+                <text>"@book.BookTitle",</text>
+        }
+    ];
+
+    const requestedData = [
+        @foreach (var book in Model.TopRequestedBooks)
+        {
+                <text>@book.Count,</text>
+        }
+    ];
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                labels: {
+                    color: '#6d1023',
+                    font: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    boxWidth: 14,
+                    boxHeight: 14
+                }
+            },
+            tooltip: {
+                backgroundColor: '#4a0f1d',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                padding: 12,
+                cornerRadius: 10
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: '#6b7280',
+                    font: {
+                        size: 11
+                    },
+                    maxRotation: 0,
+                    minRotation: 0,
+                    callback: function(value) {
+                        const label = this.getLabelForValue(value);
+                        return label.length > 16 ? label.substring(0, 16) + '…' : label;
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: '#6b7280',
+                    stepSize: 1
+                },
+                title: {
+                    display: true,
+                    text: 'Count',
+                    color: '#6d1023',
+                    font: {
+                        weight: '600'
+                    }
+                },
+                grid: {
+                    color: 'rgba(109, 16, 35, 0.08)'
+                }
+            }
+        }
+    };
+
+    new Chart(document.getElementById('borrowedChart'), {
+        type: 'bar',
+        data: {
+            labels: borrowedLabels,
+            datasets: [{
+                label: 'Times Borrowed',
+                data: borrowedData,
+                backgroundColor: 'rgba(139, 16, 40, 0.78)',
+                borderColor: '#8b1028',
+                borderWidth: 1.5,
+                borderRadius: 10,
+                barThickness: 34
+            }]
+        },
+        options: commonOptions
+    });
+
+    new Chart(document.getElementById('requestedChart'), {
+        type: 'bar',
+        data: {
+            labels: requestedLabels,
+            datasets: [{
+                label: 'Times Requested',
+                data: requestedData,
+                backgroundColor: 'rgba(233, 30, 99, 0.35)',
+                borderColor: '#c2185b',
+                borderWidth: 1.5,
+                borderRadius: 10,
+                barThickness: 34
+            }]
+        },
+        options: commonOptions
+    });
+</script>
+<script>
+    document.getElementById("analyticsSearchInput").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll(".demand-alert-row");
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    });
+</script>

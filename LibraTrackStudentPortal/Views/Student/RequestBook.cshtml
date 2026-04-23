@@ -1,4 +1,5 @@
 ﻿@model List<LibraTrackStudentPortal.Models.book>
+
 @{
     var requestedBooks = ViewBag.RequestedBooks as List<string>;
     var borrowedBooks = ViewBag.BorrowedBooks as List<string>;
@@ -20,8 +21,7 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
     <h2 class="mb-0">Request a Book</h2>
 
     <div style="max-width:400px; position:relative; width:100%;">
@@ -32,56 +32,73 @@
              class="list-group"
              style="position:absolute; width:100%; z-index:1000;"></div>
     </div>
-
 </div>
 
 <br />
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Book Title</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var book in Model)
-        {
+<form asp-action="SubmitRequest" method="post">
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <td>@book.book_title</td>
-                <td>
-                    @if (borrowedBooks != null && borrowedBooks.Contains(book.id))
-                    {
-                        <button class="btn btn-danger btn-sm" disabled>
-                            Already Borrowed
-                        </button>
-                    }
-                    else if (requestedBooks != null && requestedBooks.Contains(book.id))
-                    {
-                        <button class="btn btn-secondary btn-sm" disabled>
-                            Requested
-                        </button>
-                    }
-                    else if (book.status == "Not Available")
-                    {
-                        <button class="btn btn-dark btn-sm" disabled>
-                            Not Available
-                        </button>
-                    }
-                    else
-                    {
-                        <form asp-action="SubmitRequest" method="post">
-                            <input type="hidden" name="bookId" value="@book.id" />
-                            <button type="submit" class="btn btn-success btn-sm">
-                                Request
-                            </button>
-                        </form>
-                    }
-                </td>
+                <th style="width:80px;">Select</th>
+                <th>Book Title</th>
+                <th style="width:180px;">Status</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td class="text-center">
+                        @if (borrowedBooks != null && borrowedBooks.Contains(book.id))
+                        {
+                            <input type="checkbox" disabled />
+                        }
+                        else if (requestedBooks != null && requestedBooks.Contains(book.id))
+                        {
+                            <input type="checkbox" disabled />
+                        }
+                        else if (book.status == "Not Available")
+                        {
+                            <input type="checkbox" disabled />
+                        }
+                        else
+                        {
+                            <input type="checkbox" name="bookIds" value="@book.id" />
+                        }
+                    </td>
+
+                    <td>@book.book_title</td>
+
+                    <td>
+                        @if (borrowedBooks != null && borrowedBooks.Contains(book.id))
+                        {
+                            <span class="badge bg-danger">Already Borrowed</span>
+                        }
+                        else if (requestedBooks != null && requestedBooks.Contains(book.id))
+                        {
+                            <span class="badge bg-secondary">Requested</span>
+                        }
+                        else if (book.status == "Not Available")
+                        {
+                            <span class="badge bg-dark">Not Available</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-3 d-flex justify-content-end">
+        <button type="submit" class="btn btn-success">
+            Submit Request
+        </button>
+    </div>
+</form>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -91,7 +108,6 @@
 
     $(document).ready(function () {
 
-        // SEARCH
         $("#bookSearch").keyup(function (e) {
 
             let query = $(this).val();
@@ -102,7 +118,6 @@
                 return;
             }
 
-            // ignore arrow and enter
             if (e.keyCode === 38 || e.keyCode === 40 || e.keyCode === 13)
                 return;
 
@@ -116,7 +131,6 @@
                     selectedIndex = -1;
 
                     data.forEach(function (book) {
-
                         suggestionList += `
                             <a href="#" class="list-group-item list-group-item-action suggestion-item"
                                data-title="${book.book_title}">
@@ -131,26 +145,25 @@
 
         });
 
-        // KEYBOARD NAVIGATION
         $("#bookSearch").keydown(function (e) {
 
             let items = $(".suggestion-item");
 
             if (items.length === 0) return;
 
-            if (e.keyCode === 40) { // down
+            if (e.keyCode === 40) {
                 selectedIndex++;
                 if (selectedIndex >= items.length)
                     selectedIndex = 0;
             }
 
-            if (e.keyCode === 38) { // up
+            if (e.keyCode === 38) {
                 selectedIndex--;
                 if (selectedIndex < 0)
                     selectedIndex = items.length - 1;
             }
 
-            if (e.keyCode === 13) { // enter
+            if (e.keyCode === 13) {
                 e.preventDefault();
 
                 if (selectedIndex > -1) {
@@ -166,7 +179,6 @@
 
         });
 
-        // CLICK SUGGESTION
         $(document).on("click", ".suggestion-item", function (e) {
 
             e.preventDefault();
@@ -179,7 +191,6 @@
 
     });
 
-    // SELECT BOOK
     function selectBook(title) {
 
         $("#bookSearch").val(title);
@@ -187,7 +198,7 @@
 
         $("table tbody tr").each(function () {
 
-            let bookTitle = $(this).find("td:first").text().trim();
+            let bookTitle = $(this).find("td:nth-child(2)").text().trim();
 
             if (bookTitle.toLowerCase() === title.toLowerCase())
                 $(this).show();

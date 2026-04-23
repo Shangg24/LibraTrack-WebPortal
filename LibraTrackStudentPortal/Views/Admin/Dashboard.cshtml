@@ -1,0 +1,145 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container py-4">
+    <div class="dashboard-header mb-4">
+        <h2 class="fw-bold mb-1">Admin / IT Staff Dashboard</h2>
+        <p class="text-muted mb-0">Manage librarian and student accounts, monitor access, and maintain the system.</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Total Librarians</div>
+                <div class="summary-value">@ViewBag.TotalLibrarians</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Active Librarians</div>
+                <div class="summary-value text-success">@ViewBag.ActiveLibrarians</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Total Students</div>
+                <div class="summary-value">@ViewBag.TotalStudents</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="summary-card">
+                <div class="summary-label">Active Students</div>
+                <div class="summary-value text-success">@ViewBag.ActiveStudents</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title mb-3">Quick Actions</div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <a asp-controller="Users" asp-action="Index" class="dashboard-card text-decoration-none">
+                <div class="dashboard-card-icon"><i class="bi bi-people"></i></div>
+                <div class="dashboard-card-title">Manage Librarian Accounts</div>
+                <div class="dashboard-card-text">View, create, activate, deactivate, and reset librarian accounts.</div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-controller="StudentAccounts" asp-action="Index" class="dashboard-card text-decoration-none">
+                <div class="dashboard-card-icon"><i class="bi bi-person-lines-fill"></i></div>
+                <div class="dashboard-card-title">Manage Student Accounts</div>
+                <div class="dashboard-card-text">View, create, activate, deactivate, and reset student accounts.</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-header h2 {
+        color: #4a0f1d;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #6d1023;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 8px 24px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        height: 100%;
+    }
+
+    .summary-label {
+        font-size: 0.95rem;
+        color: #7a4b55;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4a0f1d;
+    }
+
+    .dashboard-card {
+        display: block;
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 24px 20px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        height: 100%;
+        transition: all 0.2s ease;
+        color: inherit;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            background: #fff8f9;
+            box-shadow: 0 14px 36px rgba(60, 10, 18, 0.12);
+        }
+
+    .dashboard-card-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: #f7e6ea;
+        color: #8b1028;
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+
+    .dashboard-card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #4a0f1d;
+        margin-bottom: 8px;
+    }
+
+    .dashboard-card-text {
+        color: #6b7280;
+        font-size: 0.93rem;
+        line-height: 1.5;
+    }
+</style>

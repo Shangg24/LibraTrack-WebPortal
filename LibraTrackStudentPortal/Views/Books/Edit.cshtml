@@ -1,0 +1,157 @@
+﻿@model LibraTrackStudentPortal.Models.book
+
+@{
+    ViewData["Title"] = "Edit Book";
+}
+
+<div class="container py-4 d-flex justify-content-center">
+    <div style="width: 100%; max-width: 900px;">
+
+        <div class="form-page-header mb-4 text-center">
+            <h2 class="fw-bold mb-1">Edit Book</h2>
+            <p class="text-muted mb-0">Update the book record and catalog details.</p>
+        </div>
+
+        <div class="form-card">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger mb-4">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <form asp-action="Edit" method="post">
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Book ID</label>
+                        <input asp-for="id" class="form-control modern-input readonly-input" readonly />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Book Title</label>
+                        <input asp-for="book_title" class="form-control modern-input" placeholder="Enter book title" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Author</label>
+                        <input asp-for="author" class="form-control modern-input" placeholder="Enter author name" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Published Date</label>
+                        <input asp-for="published_date" type="date" class="form-control modern-input" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select asp-for="category" class="form-select modern-input">
+                            <option value="">Select category</option>
+                            @foreach (var category in (List<string>)ViewBag.Categories)
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">ISBN</label>
+                        <input asp-for="ISBN" class="form-control modern-input" placeholder="Enter ISBN" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Shelf</label>
+                        <input asp-for="shelf" class="form-control modern-input" placeholder="e.g. ICT-S1.11" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Total Copies</label>
+                        <input asp-for="Copies" type="number" min="0" class="form-control modern-input" />
+                        <small class="text-muted">
+                            The system automatically adjusts available copies while preserving currently borrowed copies.
+                        </small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Available Copies</label>
+                        <input asp-for="available" class="form-control modern-input readonly-input" readonly />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Status</label>
+                        <input asp-for="status" class="form-control modern-input readonly-input" readonly />
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2 mt-4 justify-content-center">
+                    <button type="submit" class="btn save-btn">Save Changes</button>
+                    <a asp-action="Index" class="btn cancel-btn">Back</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .form-page-header h2 {
+        color: #4a0f1d;
+    }
+
+    .form-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .modern-input {
+        border-radius: 14px;
+        border: 1px solid #e7c8cf;
+        padding: 12px 14px;
+        box-shadow: none;
+    }
+
+        .modern-input:focus {
+            border-color: #8b1028;
+            box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
+        }
+
+    .readonly-input {
+        background: #f9f1f3;
+        color: #6d1023;
+        font-weight: 600;
+    }
+
+    .save-btn {
+        background: #8b1028;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .save-btn:hover {
+            background: #6d1023;
+            color: #ffffff;
+        }
+
+    .cancel-btn {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .cancel-btn:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+</style>

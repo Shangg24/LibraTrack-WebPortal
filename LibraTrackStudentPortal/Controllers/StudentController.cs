@@ -1,4 +1,6 @@
-﻿using LibraTrackStudentPortal.Data;
+﻿using System;
+using System.Linq;
+using LibraTrackStudentPortal.Data;
 using LibraTrackStudentPortal.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +15,18 @@ public class StudentController : Controller
         _context = context;
     }
 
-    public IActionResult Dashboard()
+    public IActionResult Dashboard(int currentPage = 1, int historyPage = 1)
     {
+        if (HttpContext.Session.GetString("Role") != "Student")
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (HttpContext.Session.GetString("MustChangePassword") == "true")
+        {
+            return RedirectToAction("ForceChangePassword");
+        }
+
         var ID_no = HttpContext.Session.GetString("StudentID");
 
         if (string.IsNullOrEmpty(ID_no))
@@ -36,33 +48,65 @@ public class StudentController : Controller
 
         var currentlyBorrowed = allTransactions
             .Where(x => x.Status == "Borrowed")
+            .OrderByDescending(x => x.IssueDate)
             .ToList();
 
         var returnedBooks = allTransactions
-            .Where(x => x.Status == "Returned")
+            .Where(x => x.Status == "Returned" || x.Status == "Completed")
+            .OrderByDescending(x => x.ReturnDate)
             .ToList();
-
-        ViewBag.CurrentlyBorrowed = currentlyBorrowed;
-        ViewBag.ReturnedBooks = returnedBooks;
 
         ViewBag.TotalTransactions = allTransactions.Count;
         ViewBag.CurrentBorrowed = currentlyBorrowed.Count;
         ViewBag.TotalReturned = returnedBooks.Count;
+
+        int pageSize = 10;
+
+        // Currently Borrowed pagination
+        var pagedCurrentlyBorrowed = currentlyBorrowed
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        ViewBag.CurrentlyBorrowed = pagedCurrentlyBorrowed;
+        ViewBag.CurrentPage = currentPage;
+        ViewBag.TotalCurrentPages = (int)Math.Ceiling((double)currentlyBorrowed.Count / pageSize);
+
+        // Borrowing History pagination
+        var pagedReturnedBooks = returnedBooks
+            .Skip((historyPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        ViewBag.ReturnedBooks = pagedReturnedBooks;
+        ViewBag.HistoryPage = historyPage;
+        ViewBag.TotalHistoryPages = (int)Math.Ceiling((double)returnedBooks.Count / pageSize);
 
         return View();
     }
 
     public IActionResult RequestBook()
     {
+       
+        if (HttpContext.Session.GetString("Role") != "Student")
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (HttpContext.Session.GetString("MustChangePassword") == "true")
+        {
+            return RedirectToAction("ForceChangePassword");
+        }
+
         var studentId = HttpContext.Session.GetString("StudentID");
 
         var books = _context.books.ToList();
 
         // existing requested books
         var requestedBookIds = _context.book_requests
-            .Where(r => r.ID_no == studentId && (r.status == "Pending" || r.status == "Approved"))
-            .Select(r => r.book_id)
-            .ToList();
+        .Where(r => r.ID_no == studentId && (r.status == "Pending" || r.status == "Reserved"))
+        .Select(r => r.book_id)
+        .ToList();
 
         // 🔴 NEW: borrowed books
         var borrowedBookIds = (from i in _context.issues
@@ -77,8 +121,18 @@ public class StudentController : Controller
     }
 
     [HttpPost]
-    public IActionResult SubmitRequest(string bookId)
+    public IActionResult SubmitRequest(List<string> bookIds)
     {
+        if (HttpContext.Session.GetString("Role") != "Student")
+        {
+            return RedirectToAction("Login", "Account");
+        }
+
+        if (HttpContext.Session.GetString("MustChangePassword") == "true")
+        {
+            return RedirectToAction("ForceChangePassword");
+        }
+
         var studentId = HttpContext.Session.GetString("StudentID");
 
         if (string.IsNullOrEmpty(studentId))
@@ -86,52 +140,89 @@ public class StudentController : Controller
             return RedirectToAction("Login", "Account");
         }
 
-        var book = _context.books.FirstOrDefault(b => b.id == bookId);
-
-        if (book.available <= 0)
+        if (bookIds == null || !bookIds.Any())
         {
-            TempData["ErrorMessage"] = "This book is not available.";
+            TempData["ErrorMessage"] = "Please select at least one book.";
             return RedirectToAction("RequestBook");
         }
 
-        var existingRequest = _context.book_requests
-            .FirstOrDefault(r => r.book_id == bookId
-                              && r.ID_no == studentId
-                              && r.status == "Pending");
+        // Generate ONE request_no for this whole transaction
+        var lastRequestNo = _context.book_requests
+            .Select(r => r.request_no)
+            .Where(r => r != null && r.StartsWith("REQ-"))
+            .OrderByDescending(r => r)
+            .FirstOrDefault();
 
-        if (existingRequest != null)
+        string newRequestNo = "REQ-0001";
+
+        if (!string.IsNullOrWhiteSpace(lastRequestNo))
         {
-            TempData["SuccessMessage"] = "You already have a pending request for this book.";
-            return RedirectToAction("RequestBook"); // ✅ FIXED
+            var numericPart = lastRequestNo.Replace("REQ-", "");
+            if (int.TryParse(numericPart, out int lastNumber))
+            {
+                newRequestNo = "REQ-" + (lastNumber + 1).ToString("D4");
+            }
         }
 
-        var request = new book_requests
-        {
-            ID_no = studentId,
-            book_id = bookId,
-            request_date = DateTime.Now,
-            status = "Pending"
-        };
+        int lastRequestId = _context.book_requests.Any()
+            ? _context.book_requests.Max(r => r.request_id)
+            : 0;
 
-        _context.book_requests.Add(request);
+        foreach (var bookId in bookIds)
+        {
+            var book = _context.books.FirstOrDefault(b => b.id == bookId);
+
+            if (book == null)
+            {
+                continue;
+            }
+
+            if (book.available <= 0)
+            {
+                continue;
+            }
+
+            var alreadyBorrowed = (from i in _context.issues
+                                   join ib in _context.issue_books on i.issue_id equals ib.issue_id
+                                   where i.ID_no == studentId
+                                         && ib.book_id == bookId
+                                         && ib.status == "Borrowed"
+                                   select ib).FirstOrDefault();
+
+            if (alreadyBorrowed != null)
+            {
+                continue;
+            }
+
+            var existingRequest = _context.book_requests
+                .FirstOrDefault(r => r.book_id == bookId
+                                  && r.ID_no == studentId
+                                  && (r.status == "Pending" || r.status == "Reserved"));
+
+            if (existingRequest != null)
+            {
+                continue;
+            }
+
+            lastRequestId++;
+
+            var request = new book_requests
+            {
+                request_id = lastRequestId,
+                ID_no = studentId,
+                book_id = bookId,
+                request_no = newRequestNo,
+                request_date = DateTime.Now,
+                status = "Pending"
+            };
+
+            _context.book_requests.Add(request);
+        }
+
         _context.SaveChanges();
 
-        TempData["SuccessMessage"] = "Your reservation request has been submitted successfully.";
-
+        TempData["SuccessMessage"] = $"Request submitted successfully. Request No: {newRequestNo}";
         return RedirectToAction("RequestBook");
-
-        var alreadyBorrowed = (from i in _context.issues
-                               join ib in _context.issue_books on i.issue_id equals ib.issue_id
-                               where i.ID_no == studentId
-                                     && ib.book_id == bookId
-                                     && ib.status == "Borrowed"
-                               select ib).FirstOrDefault();
-
-        if (alreadyBorrowed != null)
-        {
-            TempData["SuccessMessage"] = "You already borrowed this book and have not returned it yet.";
-            return RedirectToAction("RequestBook");
-        }
     }
 
     public IActionResult ForceChangePassword()
@@ -174,7 +265,7 @@ public class StudentController : Controller
         _context.SaveChanges();
 
         // 🧠 UPDATE SESSION FLAG
-        HttpContext.Session.SetString("MustChangePassword", "false");
+        HttpContext.Session.Remove("MustChangePassword");
 
         return RedirectToAction("Dashboard", "Student");
     }

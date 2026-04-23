@@ -1,0 +1,484 @@
+﻿@model IEnumerable<LibraTrackStudentPortal.Models.RequestTransactionViewModel>
+
+@{
+    ViewData["Title"] = "Book Requests";
+    var totalRequests = ViewBag.TotalRequests ?? 0;
+    var pendingRequests = ViewBag.PendingRequests ?? 0;
+    var reservedRequests = ViewBag.ReservedRequests ?? 0;
+    var borrowedRequests = ViewBag.BorrowedRequests ?? 0;
+    var completedRequests = ViewBag.CompletedRequests ?? 0;
+    var rejectedRequests = ViewBag.RejectedRequests ?? 0;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Book Requests</h2>
+            <p class="text-muted mb-0">Review and manage student request transactions.</p>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Total</div>
+                <div class="summary-value">@totalRequests</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Pending</div>
+                <div class="summary-value text-warning">@pendingRequests</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Reserved</div>
+                <div class="summary-value text-primary">@reservedRequests</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Borrowed</div>
+                <div class="summary-value" style="color:#6d28d9;">@borrowedRequests</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Completed</div>
+                <div class="summary-value text-success">@completedRequests</div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="summary-card">
+                <div class="summary-label">Rejected</div>
+                <div class="summary-value text-danger">@rejectedRequests</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-tools mb-3">
+        <div class="search-wrap">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text"
+                   id="searchInput"
+                   class="form-control search-input"
+                   placeholder="Search request..." />
+        </div>
+    </div>
+
+    <div class="modern-table-card">
+        <div class="table-responsive">
+            <table class="table modern-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Request No.</th>
+                        <th>Student ID</th>
+                        <th>Request Date</th>
+                        <th>No. of Books</th>
+                        <th>Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model)
+                    {
+                        var status = request.Status?.Trim().ToLower();
+                        var safeId = (request.RequestNo ?? "").Replace("-", "_");
+
+                        <tr class="clickable-row" onclick="toggleDetails('@safeId')">
+                            <td class="fw-semibold">@request.RequestNo</td>
+                            <td>@request.StudentID</td>
+                            <td>@request.RequestDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td>@request.BookCount</td>
+                            <td>
+                                @if (status == "pending")
+                                {
+                                    <span class="status-badge pending-badge">Pending</span>
+                                }
+                                else if (status == "reserved")
+                                {
+                                    <span class="status-badge reserved-badge">Reserved</span>
+                                }
+                                else if (status == "borrowed")
+                                {
+                                    <span class="status-badge borrowed-badge">Borrowed</span>
+                                }
+                                else if (status == "completed")
+                                {
+                                    <span class="status-badge completed-badge">Completed</span>
+                                }
+                                else if (status == "rejected")
+                                {
+                                    <span class="status-badge inactive-badge">Rejected</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge inactive-badge">@request.Status</span>
+                                }
+                            </td>
+                            <td class="text-center" onclick="event.stopPropagation();">
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    @if (status == "pending")
+                                    {
+                                        <a href="#"
+                                           class="btn action-btn btn-approve"
+                                           onclick="showConfirmModal('Approve request @request.RequestNo?', '@Url.Action("Approve", new { requestNo = request.RequestNo })')">
+                                            Approve
+                                        </a>
+
+                                        <a href="#"
+                                           class="btn action-btn btn-reject"
+                                           onclick="showConfirmModal('Reject request @request.RequestNo?', '@Url.Action("Reject", new { requestNo = request.RequestNo })')">
+                                            Reject
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No action needed</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr id="details-@safeId" class="detail-row" style="display:none;">
+                            <td colspan="6">
+                                <div class="detail-card">
+                                    <div class="row mb-3 detail-info">
+                                        <div class="col-md-6">
+                                            <div class="info-line"><strong>Request No:</strong> @request.RequestNo</div>
+                                            <div class="info-line"><strong>Student ID:</strong> @request.StudentID</div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="info-line"><strong>Request Date:</strong> @request.RequestDate.ToString("MMM dd, yyyy hh:mm tt")</div>
+                                            <div class="info-line"><strong>Status:</strong> @request.Status</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm detail-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Request ID</th>
+                                                    <th>Book ID</th>
+                                                    <th>Book Title</th>
+                                                    <th>Author</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var book in request.Books)
+                                                {
+                                                    <tr>
+                                                        <td>@book.RequestId</td>
+                                                        <td>@book.BookId</td>
+                                                        <td>@book.BookTitle</td>
+                                                        <td>@book.Author</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmBtn" class="btn btn-danger">Yes, Proceed</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="@Url.Action("Index", "Requests", new { page = ViewBag.CurrentPage - 1 })" class="btn page-btn">
+                Previous
+            </a>
+        }
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="btn page-btn active-page">@i</span>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Requests", new { page = i })" class="btn page-btn">
+                    @i
+                </a>
+            }
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="@Url.Action("Index", "Requests", new { page = ViewBag.CurrentPage + 1 })" class="btn page-btn">
+                Next
+            </a>
+        }
+    </div>
+}
+
+<style>
+    .summary-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 20px 22px;
+        box-shadow: 0 8px 24px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        height: 100%;
+    }
+
+    .summary-label {
+        font-size: 0.95rem;
+        color: #7a4b55;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4a0f1d;
+    }
+
+    .table-tools {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .search-wrap {
+        position: relative;
+        width: 320px;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b1028;
+        font-size: 0.95rem;
+    }
+
+    .search-input {
+        border-radius: 14px;
+        border: 1px solid #e7c8cf;
+        padding: 12px 14px 12px 40px;
+        min-height: 48px;
+        box-shadow: 0 4px 14px rgba(60, 10, 18, 0.05);
+        background: #fffdfd;
+    }
+
+        .search-input:focus {
+            border-color: #8b1028;
+            box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
+        }
+
+    .modern-table-card {
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(60, 10, 18, 0.08);
+        border: 1px solid #f1d9de;
+        overflow: hidden;
+    }
+
+    .modern-table thead th {
+        background: #f7e6ea;
+        color: #4a0f1d;
+        font-weight: 800;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e8c8cf;
+        padding: 18px 14px;
+    }
+
+    .modern-table tbody td {
+        padding: 18px 14px;
+        border-color: #f6ecef;
+        vertical-align: middle;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #fff8f9;
+        cursor: pointer;
+    }
+
+    .detail-row td {
+        background: #fffafb;
+    }
+
+    .detail-card {
+        background: #fffdfd;
+        border: 1px solid #f1d9de;
+        border-radius: 16px;
+        padding: 18px;
+    }
+
+    .detail-info .info-line {
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    .detail-table thead th {
+        background: #fdf1f3;
+        color: #6d1023;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .pending-badge {
+        background: rgba(245, 158, 11, 0.15);
+        color: #b45309;
+    }
+
+    .reserved-badge {
+        background: rgba(59, 130, 246, 0.15);
+        color: #1d4ed8;
+    }
+
+    .borrowed-badge {
+        background: rgba(139, 92, 246, 0.15);
+        color: #6d28d9;
+    }
+
+    .completed-badge {
+        background: rgba(16, 185, 129, 0.15);
+        color: #047857;
+    }
+
+    .inactive-badge {
+        background: rgba(109, 16, 35, 0.12);
+        color: #8b1028;
+    }
+
+    .action-btn {
+        min-width: 100px;
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border: none;
+    }
+
+    .btn-approve {
+        background: #15803d;
+        color: white;
+    }
+
+        .btn-approve:hover {
+            background: #166534;
+            color: white;
+        }
+
+    .btn-reject {
+        background: #8b1028;
+        color: white;
+    }
+
+        .btn-reject:hover {
+            background: #6d1023;
+            color: white;
+        }
+
+    .page-btn {
+        border: 1px solid #e7c8cf;
+        background: #ffffff;
+        color: #6d1023;
+        border-radius: 10px;
+        min-width: 44px;
+        font-weight: 600;
+        padding: 8px 14px;
+    }
+
+        .page-btn:hover {
+            background: #f9f1f3;
+            color: #4a0f1d;
+        }
+
+    .active-page {
+        background: #8b1028 !important;
+        color: #ffffff !important;
+        border-color: #8b1028 !important;
+        cursor: default;
+    }
+
+</style>
+
+<script>
+    function showConfirmModal(message, url) {
+        document.getElementById("confirmMessage").innerText = message;
+        document.getElementById("confirmBtn").setAttribute("href", url);
+
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    function toggleDetails(id) {
+        const row = document.getElementById("details-" + id);
+        if (row.style.display === "none") {
+            row.style.display = "table-row";
+        } else {
+            row.style.display = "none";
+        }
+    }
+
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll(".clickable-row");
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            let detailRow = document.getElementById("details-" + row.cells[0].innerText.replace("-", "_"));
+
+            if (text.includes(filter)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+                if (detailRow) detailRow.style.display = "none";
+            }
+        });
+    });
+</script>

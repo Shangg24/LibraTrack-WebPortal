@@ -10,6 +10,7 @@ namespace LibraTrackStudentPortal.Models
         public string book_id { get; set; }
         public DateTime request_date { get; set; }
         public string status { get; set; }
+        public string request_no { get; set; }
     }
 
 }

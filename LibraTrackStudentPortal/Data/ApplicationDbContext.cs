@@ -15,6 +15,8 @@ namespace LibraTrackStudentPortal.Data
         public DbSet<issue_books> issue_books { get; set; }
         public DbSet<book> books { get; set; }
         public DbSet<book_requests> book_requests { get; set; }
+        public DbSet<Users> users { get; set; }
+        public DbSet<GradeSection> GradeSections { get; set; }
 
     }
 
