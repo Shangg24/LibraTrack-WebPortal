@@ -21,22 +21,29 @@
     </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-    <h2 class="mb-0">Request a Book</h2>
-
-    <div style="max-width:400px; position:relative; width:100%;">
-        <input type="text" id="bookSearch" class="form-control"
-               placeholder="Search book title or author...">
-
-        <div id="suggestions"
-             class="list-group"
-             style="position:absolute; width:100%; z-index:1000;"></div>
-    </div>
-</div>
-
-<br />
-
 <form asp-action="SubmitRequest" method="post">
+
+    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-3">
+        <h2 class="mb-0">Request a Book</h2>
+
+        <div class="request-actions">
+            <div style="max-width:400px; position:relative; width:100%;">
+                <input type="text" id="bookSearch" class="form-control"
+                       placeholder="Search book title or author...">
+
+                <div id="suggestions"
+                     class="list-group"
+                     style="position:absolute; width:100%; z-index:1000;"></div>
+            </div>
+
+            <button type="submit" class="btn submit-request-btn">
+                Submit Request
+            </button>
+        </div>
+    </div>
+
+    <br />
+
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -93,12 +100,30 @@
         </tbody>
     </table>
 
-    <div class="mt-3 d-flex justify-content-end">
-        <button type="submit" class="btn btn-success">
-            Submit Request
-        </button>
-    </div>
 </form>
+
+<style>
+    .request-actions {
+        width: 400px;
+        max-width: 100%;
+    }
+
+    .submit-request-btn {
+        margin-top: 10px;
+        background: #8b1028;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 600;
+        float: right;
+    }
+
+        .submit-request-btn:hover {
+            background: #6d1023;
+            color: #ffffff;
+        }
+</style>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
