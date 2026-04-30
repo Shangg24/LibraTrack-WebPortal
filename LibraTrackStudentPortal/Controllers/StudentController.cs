@@ -82,6 +82,20 @@ public class StudentController : Controller
         ViewBag.HistoryPage = historyPage;
         ViewBag.TotalHistoryPages = (int)Math.Ceiling((double)returnedBooks.Count / pageSize);
 
+        var requestedBooks = (from r in _context.book_requests
+                              join b in _context.books on r.book_id equals b.id
+                              where r.ID_no.Trim() == ID_no.Trim()
+                                    && (r.status == "Pending" || r.status == "Reserved")
+                              orderby r.request_date descending
+                              select new
+                              {
+                                  BookTitle = b.book_title,
+                                  RequestDate = r.request_date,
+                                  Status = r.status
+                              }).ToList();
+
+        ViewBag.RequestedBooks = requestedBooks;
+
         return View();
     }
 
