@@ -1,4 +1,6 @@
 using LibraTrackStudentPortal.Data;
+using LibraTrackStudentPortal.Models;
+using LibraTrackStudentPortal.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,11 @@ builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<ForcePasswordChangeFilter>();
 });
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddSession();
 

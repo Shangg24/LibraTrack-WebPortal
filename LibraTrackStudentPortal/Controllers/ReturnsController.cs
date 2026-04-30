@@ -1,10 +1,12 @@
 ﻿using LibraTrackStudentPortal.Data;
 using LibraTrackStudentPortal.Models;
+using LibraTrackStudentPortal.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 
 namespace LibraTrackStudentPortal.Controllers
@@ -12,10 +14,12 @@ namespace LibraTrackStudentPortal.Controllers
     public class ReturnsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly EmailService _emailService;
 
-        public ReturnsController(ApplicationDbContext context)
+        public ReturnsController(ApplicationDbContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         public IActionResult Index(int page = 1, int historyPage = 1)
@@ -233,5 +237,103 @@ namespace LibraTrackStudentPortal.Controllers
             TempData["Success"] = $"Return processed successfully for transaction {issueId}.";
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> SendOverdueNotices()
+        {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role != "Librarian" && role != "IT")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var overdueRows = (from i in _context.issues
+                               join ib in _context.issue_books on i.issue_id equals ib.issue_id
+                               join b in _context.books on ib.book_id equals b.id
+                               join s in _context.Students on i.ID_no equals s.ID_no
+                               where ib.status == "Borrowed"
+                                     && i.return_date.Date < DateTime.Today
+                                     && s.email != null
+                               select new
+                               {
+                                   StudentEmail = s.email,
+                                   StudentName = s.full_name,
+                                   BookTitle = b.book_title,
+                                   DueDate = i.return_date,
+                                   DaysOverdue = (DateTime.Today - i.return_date.Date).Days
+                               }).ToList();
+
+            if (!overdueRows.Any())
+            {
+                TempData["Success"] = "No overdue borrowed books found.";
+                return RedirectToAction("Index");
+            }
+
+            var groupedByStudent = overdueRows.GroupBy(x => new
+            {
+                x.StudentEmail,
+                x.StudentName
+            });
+
+            int sentCount = 0;
+
+            foreach (var studentGroup in groupedByStudent)
+            {
+                var bookRows = new StringBuilder();
+
+                foreach (var item in studentGroup)
+                {
+                    bookRows.AppendLine($@"
+                <tr>
+                    <td style='border: 1px solid #ccc; padding: 8px;'>{item.BookTitle}</td>
+                    <td style='border: 1px solid #ccc; padding: 8px;'>{item.DueDate:MMMM dd, yyyy}</td>
+                    <td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>{item.DaysOverdue} day(s)</td>
+                </tr>");
+                }
+
+                var body = $@"
+            <div style='font-family: Arial, sans-serif; font-size: 14px; color: #333;'>
+                <p>Hi {studentGroup.Key.StudentName},</p>
+
+                <p>Just a quick reminder that you still have overdue book(s) from the library:</p>
+
+                <table style='border-collapse: collapse; width: 100%; margin-top: 10px;'>
+                    <thead>
+                        <tr style='background-color: #f2f2f2;'>
+                            <th style='border: 1px solid #ccc; padding: 8px; text-align: left;'>Book Title</th>
+                            <th style='border: 1px solid #ccc; padding: 8px; text-align: left;'>Due Date</th>
+                            <th style='border: 1px solid #ccc; padding: 8px; text-align: center;'>Days Overdue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {bookRows}
+                    </tbody>
+                </table>
+
+                <p style='margin-top: 15px;'>
+                    If you’ve already returned these, you may ignore this message.
+                    Otherwise, please return them as soon as you can.
+                </p>
+
+                <p>
+                    Thanks,<br>
+                    LibraTrack Team
+                </p>
+            </div>";
+
+                await _emailService.SendEmailAsync(
+                    studentGroup.Key.StudentEmail,
+                    "Overdue Book Reminder - LibraTrack",
+                    body
+                );
+
+                sentCount++;
+            }
+
+            TempData["Success"] = $"Overdue email notices sent successfully to {sentCount} student(s).";
+
+            return RedirectToAction("Index");
+        }
+
     }
 }

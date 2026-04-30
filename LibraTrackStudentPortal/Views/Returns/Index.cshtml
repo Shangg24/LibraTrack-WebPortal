@@ -12,6 +12,11 @@
             <h2 class="fw-bold mb-1">Process Returns</h2>
             <p class="text-muted mb-0">Manage borrowed book transactions and process returns.</p>
         </div>
+
+        <button class="btn send-overdue-btn"
+                onclick="showConfirmModal('Send overdue email notices to students with overdue books?', '@Url.Action("SendOverdueNotices", "Returns")')">
+            Send Overdue Notices
+        </button>
     </div>
 
     @if (TempData["Success"] != null)
@@ -167,7 +172,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Action</h5>
+                <h5 class="modal-title">LibraTrack</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
@@ -527,6 +532,20 @@
         border-color: #8b1028 !important;
         cursor: default;
     }
+
+    .send-overdue-btn {
+        background: #8b1028;
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+        .send-overdue-btn:hover {
+            background: #6d1023;
+            color: #ffffff;
+        }
 
 </style>
 
