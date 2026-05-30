@@ -10,7 +10,7 @@ namespace LibraTrackStudentPortal.Data
         {
         }
 
-        public DbSet<Student> Students { get; set; }
+        public DbSet<Student> students { get; set; }
         public DbSet<issue> issues { get; set; }
         public DbSet<issue_books> issue_books { get; set; }
         public DbSet<book> books { get; set; }

@@ -35,7 +35,7 @@ namespace LibraTrackStudentPortal.Controllers
             var borrowedRows = (from i in _context.issues
                                 join ib in _context.issue_books on i.issue_id equals ib.issue_id
                                 join b in _context.books on ib.book_id equals b.id
-                                join s in _context.Students on i.ID_no equals s.ID_no into studentJoin
+                                join s in _context.students on i.ID_no equals s.ID_no into studentJoin
                                 from s in studentJoin.DefaultIfEmpty()
                                 where ib.status == "Borrowed"
                                 select new
@@ -87,7 +87,7 @@ namespace LibraTrackStudentPortal.Controllers
             var completedRows = (from i in _context.issues
                                  join ib in _context.issue_books on i.issue_id equals ib.issue_id
                                  join b in _context.books on ib.book_id equals b.id
-                                 join s in _context.Students on i.ID_no equals s.ID_no into studentJoin
+                                 join s in _context.students on i.ID_no equals s.ID_no into studentJoin
                                  from s in studentJoin.DefaultIfEmpty()
                                  where i.status == "Completed" || ib.status == "Completed" || ib.status == "Returned"
                                  select new
@@ -250,7 +250,7 @@ namespace LibraTrackStudentPortal.Controllers
             var overdueRows = (from i in _context.issues
                                join ib in _context.issue_books on i.issue_id equals ib.issue_id
                                join b in _context.books on ib.book_id equals b.id
-                               join s in _context.Students on i.ID_no equals s.ID_no
+                               join s in _context.students on i.ID_no equals s.ID_no
                                where ib.status == "Borrowed"
                                      && i.return_date.Date < DateTime.Today
                                      && s.email != null

@@ -32,7 +32,7 @@ namespace LibraTrackStudentPortal.Controllers
             // 🔵 Check Admin first
             // 🔵 DEBUG ADMIN LOGIN (STEP BY STEP)
             var user = _context.users
-    .FirstOrDefault(u => u.username != null && u.username.Trim() == username.Trim());
+    .FirstOrDefault(u => u.username == username);
 
             if (user != null)
             {
@@ -71,8 +71,9 @@ namespace LibraTrackStudentPortal.Controllers
             }
 
             // 🟢 Then check Student
-            var student = _context.Students
+            var student = _context.students
                 .FirstOrDefault(s => s.ID_no == username);
+ 
 
             if (student == null)
             {
@@ -108,9 +109,8 @@ namespace LibraTrackStudentPortal.Controllers
 
         public IActionResult ResetMyPassword()
         {
-            var username = HttpContext.Session.GetString("Username");
-
-            var user = _context.users.FirstOrDefault(u => u.username == username);
+            var user = _context.users
+                .FirstOrDefault(u => u.username == "librarian_1");
 
             if (user == null)
             {
@@ -118,13 +118,13 @@ namespace LibraTrackStudentPortal.Controllers
             }
 
             var hasher = new PasswordHasher<Users>();
-            string newPassword = "admin123";
 
-            user.password = hasher.HashPassword(user, newPassword);
+            user.password = hasher.HashPassword(user, "admin123");
+            user.status = "Active";
 
             _context.SaveChanges();
 
-            return Content($"Your password has been reset. New password: {newPassword}");
+            return Content("Password reset successful.");
         }
 
         public IActionResult ChangePassword()

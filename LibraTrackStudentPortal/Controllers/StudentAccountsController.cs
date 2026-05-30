@@ -26,7 +26,7 @@ namespace LibraTrackStudentPortal.Controllers
 
             int pageSize = 20;
 
-            var query = _context.Students.AsQueryable();
+            var query = _context.students.AsQueryable();
 
             ViewBag.TotalStudents = query.Count();
             ViewBag.ActiveStudents = query.Count(s => s.IsActive);
@@ -53,7 +53,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == id);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == id);
 
             if (student == null)
             {
@@ -75,7 +75,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == id);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == id);
 
             if (student == null)
             {
@@ -141,7 +141,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return View(student);
             }
 
-            var existing = _context.Students.FirstOrDefault(s => s.ID_no == student.ID_no);
+            var existing = _context.students.FirstOrDefault(s => s.ID_no == student.ID_no);
             if (existing != null)
             {
                 ViewBag.Error = "Student ID already exists.";
@@ -165,7 +165,7 @@ namespace LibraTrackStudentPortal.Controllers
 
 
             student.date_registered = DateTime.Now;
-            _context.Students.Add(student);
+            _context.students.Add(student);
             _context.SaveChanges();
 
             TempData["Success"] = "Student account created successfully.";
@@ -181,7 +181,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == id);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == id);
 
             if (student == null)
             {
@@ -208,7 +208,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == id);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == id);
             if (student == null)
             {
                 return NotFound();
@@ -241,7 +241,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == updatedStudent.ID_no);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == updatedStudent.ID_no);
             if (student == null)
             {
                 return NotFound();

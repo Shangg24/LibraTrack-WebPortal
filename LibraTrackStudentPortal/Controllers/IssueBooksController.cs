@@ -28,7 +28,7 @@ namespace LibraTrackStudentPortal.Controllers
 
             var reservedRequests = (from r in _context.book_requests
                                     join b in _context.books on r.book_id equals b.id
-                                    join s in _context.Students on r.ID_no equals s.ID_no
+                                    join s in _context.students on r.ID_no equals s.ID_no
                                     where r.status == "Reserved"
                                     select new
                                     {
@@ -106,7 +106,7 @@ namespace LibraTrackStudentPortal.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var student = _context.Students.FirstOrDefault(s => s.ID_no == id);
+            var student = _context.students.FirstOrDefault(s => s.ID_no == id);
 
             if (student == null)
             {

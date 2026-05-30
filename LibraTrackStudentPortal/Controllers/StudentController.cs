@@ -264,7 +264,7 @@ public class StudentController : Controller
             return View();
         }
 
-        var student = _context.Students.FirstOrDefault(s => s.ID_no == studentId);
+        var student = _context.students.FirstOrDefault(s => s.ID_no == studentId);
 
         if (student == null)
             return RedirectToAction("Login", "Account");
@@ -299,7 +299,7 @@ public class StudentController : Controller
     {
         var studentId = HttpContext.Session.GetString("StudentID");
 
-        var student = _context.Students
+        var student = _context.students
             .FirstOrDefault(s => s.ID_no == studentId);
 
         if (student == null)

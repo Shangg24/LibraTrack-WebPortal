@@ -23,8 +23,8 @@ namespace LibraTrackStudentPortal.Controllers
 
             ViewBag.TotalLibrarians = _context.users.Count(u => u.role == "Librarian");
             ViewBag.ActiveLibrarians = _context.users.Count(u => u.role == "Librarian" && u.status == "Active");
-            ViewBag.TotalStudents = _context.Students.Count();
-            ViewBag.ActiveStudents = _context.Students.Count(s => s.IsActive);
+            ViewBag.TotalStudents = _context.students.Count();
+            ViewBag.ActiveStudents = _context.students.Count(s => s.IsActive);
 
             return View();
         }
