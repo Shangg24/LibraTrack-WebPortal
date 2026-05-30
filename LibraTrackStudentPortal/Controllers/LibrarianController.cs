@@ -25,7 +25,11 @@ namespace LibraTrackStudentPortal.Controllers
 
             ViewBag.TotalBooks = _context.books.Count();
             ViewBag.AvailableBooks = _context.books.Count(b => b.available > 0);
-            ViewBag.PendingRequests = _context.book_requests.Count(r => r.status == "Pending");
+            ViewBag.PendingRequests = _context.book_requests
+    .Where(r => r.status == "Pending")
+    .Select(r => r.request_no)
+    .Distinct()
+    .Count();
             ViewBag.BorrowedBooks = _context.issue_books.Count(i => i.status == "Borrowed");
 
             return View();

@@ -12,14 +12,6 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
 
 /* Dashboard Cards */
 .dashboard-card {
@@ -32,4 +24,14 @@ body {
         transform: translateY(-6px) scale(1.02);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
     }
+
+html, body {
+    height: auto !important;
+    overflow: visible !important;
+}
+
+body {
+    position: static !important;
+}
+
 

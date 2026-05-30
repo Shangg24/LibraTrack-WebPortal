@@ -73,7 +73,7 @@ namespace LibraTrackStudentPortal.Controllers
             // 🟢 Then check Student
             var student = _context.students
                 .FirstOrDefault(s => s.ID_no == username);
- 
+  
 
             if (student == null)
             {

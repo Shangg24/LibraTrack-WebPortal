@@ -59,10 +59,28 @@
         </div>
 
         <div class="col-md-6 col-lg-4">
-            <a asp-controller="Requests" asp-action="Index" class="dashboard-card text-decoration-none">
-                <div class="dashboard-card-icon"><i class="bi bi-list-check"></i></div>
-                <div class="dashboard-card-title">Book Requests</div>
-                <div class="dashboard-card-text">Review and manage student reservation requests.</div>
+            <a asp-controller="Requests"
+               asp-action="Index"
+               class="dashboard-card text-decoration-none @(ViewBag.PendingRequests > 0 ? "pending-request-card" : "")">
+
+                <div class="dashboard-card-icon">
+                    <i class="bi bi-list-check"></i>
+                </div>
+
+                <div class="dashboard-card-title">
+                    Book Requests
+
+                    @if (ViewBag.PendingRequests > 0)
+                    {
+                        <span class="request-badge">
+                            @ViewBag.PendingRequests New
+                        </span>
+                    }
+                </div>
+
+                <div class="dashboard-card-text">
+                    Review and manage student reservation requests.
+                </div>
             </a>
         </div>
 
@@ -167,4 +185,23 @@
         font-size: 0.93rem;
         line-height: 1.5;
     }
+
+    .request-badge {
+        background: #dc3545;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin-left: 8px;
+    }
+
+    .pending-request-card {
+        border: 2px solid #dc3545 !important;
+        background: #fff5f5;
+    }
+
+        .pending-request-card:hover {
+            background: #ffeaea;
+        }
+
 </style>
