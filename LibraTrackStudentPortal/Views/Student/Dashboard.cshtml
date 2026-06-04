@@ -25,6 +25,7 @@
 <h3>My Borrowed Books</h3>
 
 <div class="row mb-4">
+
     <div class="col-md-4">
         <div class="card text-white bg-primary dashboard-card">
             <div class="card-body text-center">
@@ -51,6 +52,52 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="row mb-4">
+
+    @if (ViewBag.RecommendedBooks != null)
+    {
+        foreach (var item in ViewBag.RecommendedBooks)
+        {
+            <div class="col-md-4 mb-3">
+
+                <div class="recommend-card modern-card">
+
+                    <!-- TOP ROW: TAG + COUNT -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <span class="badge
+                        @(item.Tag == "🔥 Trending" ? "bg-danger" :
+                                                item.Tag == "📈 High Demand" ? "bg-primary" :
+                                                "bg-secondary")">
+                    @item.Tag
+                </span>
+
+                    </div>
+
+                    <!-- TITLE -->
+                    <h6 class="fw-bold mb-1 text-dark text-truncate"
+                        title="@item.BookTitle">
+                        @item.BookTitle
+                    </h6>
+
+                    <!-- SUBTEXT -->
+                    <small class="text-muted d-block mb-2">
+                        Based on borrowing trends
+                    </small>
+
+                    <!-- FIXED LABEL (KEEP THIS) -->
+                    <span class="recommended-label">
+                        Recommended
+                    </span>
+
+                </div>
+
+            </div>
+        }
+    }
+
 </div>
 
 <div class="row mt-4">
@@ -316,5 +363,48 @@
         color: #ffffff !important;
         border-color: #8b1028 !important;
         cursor: default;
+    }
+
+    .modern-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 14px;
+        height: 160px; /* FIXED HEIGHT */
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        transition: 0.25s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+        .modern-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        }
+
+    .count-pill {
+        background: #111827;
+        color: white;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .recommended-label {
+        margin-top: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6d1023;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
     }
 </style>

@@ -34,6 +34,41 @@ public class StudentController : Controller
             return RedirectToAction("Login", "Account");
         }
 
+        var recommendedBooks =
+    (from ib in _context.issue_books
+     join b in _context.books
+         on ib.book_id equals b.id
+     group ib by b.book_title into g
+     orderby g.Count() descending
+     select new RecommendedBookViewModel
+     {
+         BookTitle = g.Key,
+         BorrowCount = g.Count()
+     })
+     .Take(3)
+     .ToList();
+
+        int maxCount = recommendedBooks.FirstOrDefault()?.BorrowCount ?? 0;
+
+        foreach (var book in recommendedBooks)
+        {
+            if (book.BorrowCount == maxCount)
+            {
+                book.Tag = "🔥 Trending";
+            }
+            else if (book.BorrowCount >= maxCount * 0.6)
+            {
+                book.Tag = "📈 High Demand";
+            }
+            else
+            {
+                book.Tag = "⭐ Popular";
+            }
+        }
+
+
+        ViewBag.RecommendedBooks = recommendedBooks;
+
         var allTransactions = (from i in _context.issues
                                join ib in _context.issue_books on i.issue_id equals ib.issue_id
                                join b in _context.books on ib.book_id equals b.id
