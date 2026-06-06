@@ -12,6 +12,7 @@ namespace LibraTrackStudentPortal.Models
         public List<TopBookViewModel> TopBorrowedBooks { get; set; }
         public List<TopBookViewModel> TopRequestedBooks { get; set; }
         public List<BookDemandViewModel> DemandAlerts { get; set; }
+        public List<BookForecastViewModel> ForecastBooks { get; set; }
     }
 
     public class TopBookViewModel

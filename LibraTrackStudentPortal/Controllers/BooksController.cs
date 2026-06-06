@@ -229,6 +229,44 @@ namespace LibraTrackStudentPortal.Controllers
             TempData["Success"] = "Book updated successfully.";
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public IActionResult Delete(string id)
+        {
+            var role = HttpContext.Session.GetString("Role");
+
+            if (role != "Librarian" && role != "IT")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var book = _context.books.FirstOrDefault(b => b.id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            bool hasTransactions = _context.issue_books
+                .Any(x => x.book_id == id);
+
+            if (hasTransactions)
+            {
+                TempData["Error"] =
+                    "This book cannot be deleted because it has borrowing records.";
+
+                return RedirectToAction("Index");
+            }
+
+            _context.books.Remove(book);
+
+            _context.SaveChanges();
+
+            TempData["Success"] =
+                "Book deleted successfully.";
+
+            return RedirectToAction("Index");
+        }
     }
 
 }

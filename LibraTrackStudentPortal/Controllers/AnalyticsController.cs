@@ -44,7 +44,7 @@ namespace LibraTrackStudentPortal.Controllers
                                         BookId = g.Key.id,
                                         BookTitle = g.Key.book_title,
                                         Count = g.Count()
-                                    }).Take(5).ToList();
+                                    }).Take(10).ToList();
 
             var topRequestedBooks = (from r in _context.book_requests
                                      join b in _context.books on r.book_id equals b.id
@@ -75,7 +75,26 @@ namespace LibraTrackStudentPortal.Controllers
                                 .OrderByDescending(x => x.RequestCount + x.BorrowCount)
                                 .ToList();
 
-            
+            var forecastBooks = topBorrowedBooks
+    .Select(x => new BookForecastViewModel
+    {
+        BookTitle = x.BookTitle,
+
+        CurrentBorrowCount = x.Count,
+
+        PredictedNextMonth =
+            x.Count <= 5 ? x.Count + 1 :
+            x.Count <= 10 ? x.Count + 2 :
+            x.Count + 3,
+
+        Trend =
+            x.Count >= 10 ? "Increasing" :
+            x.Count >= 5 ? "Stable" :
+            "Low Demand"
+    })
+    .ToList();
+
+
 
             int alertsPageSize = 20;
             int totalAlerts = demandAlerts.Count;
@@ -96,7 +115,8 @@ namespace LibraTrackStudentPortal.Controllers
                 MostBorrowedCategory = mostBorrowedCategory,
                 TopBorrowedBooks = topBorrowedBooks,
                 TopRequestedBooks = topRequestedBooks,
-                DemandAlerts = pagedDemandAlerts
+                DemandAlerts = pagedDemandAlerts,
+                ForecastBooks = forecastBooks
             };
 
             return View(model);

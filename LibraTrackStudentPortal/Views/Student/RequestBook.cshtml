@@ -45,9 +45,15 @@
 
     <br />
 
-    <table class="table table-bordered">
+    <div class="mb-3">
+        <span class="badge bg-primary" id="selectedCount">
+            0 Books Selected
+        </span>
+    </div>
+
+    <table class="table table-hover align-middle request-table">
         <thead>
-            <tr>
+            <tr class="selectable-row">
                 <th style="width:80px;">Select</th>
                 <th>Book Title</th>
                 <th style="width:180px;">Status</th>
@@ -56,7 +62,7 @@
         <tbody>
             @foreach (var book in Model)
             {
-                <tr>
+                <tr class="selectable-row">
                     <td class="text-center">
                         @if (borrowedBooks != null && borrowedBooks.Contains(book.id))
                         {
@@ -72,7 +78,10 @@
                         }
                         else
                         {
-                            <input type="checkbox" name="bookIds" value="@book.id" />
+                            <input type="checkbox"
+                                   class="book-checkbox"
+                                   name="bookIds"
+                                   value="@book.id" />
                         }
                     </td>
 
@@ -123,6 +132,42 @@
         .submit-request-btn:hover {
             background: #6d1023;
             color: #ffffff;
+        }
+
+    .selectable-row {
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+        .selectable-row:hover {
+            background-color: #fff5f7;
+        }
+
+    .selected-book {
+        background-color: #fdecef !important;
+    }
+
+    .book-checkbox {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+    }
+
+    .request-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+
+        .request-table thead {
+            background: #8b1028;
+            color: white;
+        }
+
+        .request-table th,
+        .request-table td {
+            vertical-align: middle;
         }
 </style>
 
@@ -233,5 +278,40 @@
 
         });
 
+    }
+
+        $(document).on("click", ".selectable-row", function (e) {
+
+        if ($(e.target).is("input"))
+            return;
+
+        let checkbox = $(this).find(".book-checkbox");
+
+        checkbox.prop("checked", !checkbox.prop("checked"));
+
+        checkbox.trigger("change");
+
+    });
+
+        $(document).on("change", ".book-checkbox", function () {
+
+        $(this)
+            .closest("tr")
+            .toggleClass(
+                "selected-book",
+                $(this).is(":checked")
+            );
+
+        updateSelectedCount();
+
+    });
+
+        function updateSelectedCount() {
+
+        let count = $(".book-checkbox:checked").length;
+
+        $("#selectedCount").text(
+            count + " Book(s) Selected"
+        );
     }
 </script>

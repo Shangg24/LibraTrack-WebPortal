@@ -40,6 +40,76 @@
         </div>
     </div>
 
+
+    <div class="card forecast-card-sm border-0 mt-4">
+
+        <div class="card-header forecast-header">
+            <h5 class="mb-0">
+                Top 10 Forecasted Book Demand
+            </h5>
+
+            <small>
+                Shows the current borrowing count and the projected demand for the next month.
+            </small>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table modern-table">
+
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Current Borrow Count</th>
+                        <th>Predicted Next Month</th>
+                        <th>Trend</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var book in Model.ForecastBooks)
+                    {
+                        <tr>
+
+                            <td>
+                                @book.BookTitle
+                            </td>
+
+                            <td>
+                                @book.CurrentBorrowCount
+                            </td>
+
+                            <td class="fw-bold text-success">
+                                @book.PredictedNextMonth
+                            </td>
+
+                            <td>
+
+                                <span class="status-badge
+                            @(book.Trend == "Increasing"
+                                                                  ? "stable-badge"
+                                                                  : book.Trend == "Stable"
+                                                                      ? "warning-badge"
+                                                                      : "danger-badge")">
+
+                                @book.Trend
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+                                        }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="modern-card chart-card">
@@ -69,104 +139,9 @@
             </div>
         </div>
     </div>
-
-    <div class="table-tools mt-4 mb-3">
-        <div class="analytics-search-form">
-            <div class="search-wrap analytics-search-wrap">
-                <i class="bi bi-search search-icon"></i>
-                <input type="text"
-                       id="analyticsSearchInput"
-                       class="form-control search-input"
-                       placeholder="Search demand alert..." />
-            </div>
-        </div>
-    </div>
-
-    <div class="modern-card mt-4">
-        <h5 class="fw-bold mb-3">Demand Alerts</h5>
-        <p class="chart-subtitle mb-3">
-            Books marked as High Demand may need restocking or closer monitoring.
-        </p>
-        <div class="table-responsive">
-            <table class="table modern-table mb-0">
-                <thead>
-                    <tr>
-                        <th>Book ID</th>
-                        <th>Book Title</th>
-                        <th>Requests</th>
-                        <th>Borrows</th>
-                        <th>Available</th>
-                        <th>Demand Level</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.DemandAlerts)
-                    {
-                        <tr class="demand-alert-row">
-                            <td>@item.BookId</td>
-                            <td>@item.BookTitle</td>
-                            <td>@item.RequestCount</td>
-                            <td>@item.BorrowCount</td>
-                            <td>@item.AvailableCopies</td>
-                            <td>
-                                @if (item.DemandLevel == "High Demand")
-                                {
-                                    <span class="status-badge danger-badge">High Demand</span>
-                                }
-                                else if (item.DemandLevel == "Monitor")
-                                {
-                                    <span class="status-badge warning-badge">Monitor</span>
-                                }
-                                else
-                                {
-                                    <span class="status-badge stable-badge">Stable</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
-@if (ViewBag.TotalAlertsPages > 1)
-{
-    <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
 
-        @if (ViewBag.AlertsPage > 1)
-        {
-            <a href="@Url.Action("Index", "Analytics", new { alertsPage = ViewBag.AlertsPage - 1 })"
-               class="btn page-btn">
-                Previous
-            </a>
-        }
-
-        @for (int i = 1; i <= ViewBag.TotalAlertsPages; i++)
-        {
-            if (i == ViewBag.AlertsPage)
-            {
-                <span class="btn page-btn active-page">@i</span>
-            }
-            else
-            {
-                <a href="@Url.Action("Index", "Analytics", new { alertsPage = i })"
-                   class="btn page-btn">
-                    @i
-                </a>
-            }
-        }
-
-        @if (ViewBag.AlertsPage < ViewBag.TotalAlertsPages)
-        {
-            <a href="@Url.Action("Index", "Analytics", new { alertsPage = ViewBag.AlertsPage + 1 })"
-               class="btn page-btn">
-                Next
-            </a>
-        }
-
-    </div>
-}
 
 <style>
     .summary-card, .modern-card {
@@ -318,6 +293,55 @@
             border-color: #8b1028;
             box-shadow: 0 0 0 0.2rem rgba(139, 16, 40, 0.12);
         }
+
+    .forecast-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 18px;
+        border: 1px solid #f1d9de;
+        box-shadow: 0 8px 24px rgba(60,10,18,.08);
+        transition: .3s;
+        height: 100%;
+    }
+
+        .forecast-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .forecast-stats {
+        display: flex;
+        justify-content: space-between;
+        margin: 15px 0;
+    }
+
+        .forecast-stats h5 {
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+    .forecast-header {
+        background: linear-gradient( 135deg, #7b1128, #9f1d35 );
+        color: white;
+        border: none;
+        padding: 16px 20px;
+    }
+
+        .forecast-header h5 {
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+    .forecast-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    }
+
+    .forecast-table tbody tr:hover {
+        background: #faf5f6;
+        transition: .2s;
+    }
 
 </style>
 

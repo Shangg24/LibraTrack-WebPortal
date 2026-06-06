@@ -7,6 +7,16 @@
     var unavailableBooks = ViewBag.UnavailableBooks ?? 0;
 }
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
@@ -95,9 +105,23 @@
                                 }
                             </td>
                             <td class="text-center" onclick="event.stopPropagation();">
+                                <div class="d-flex justify-content-center align-items-center gap-2">
                                 <a asp-action="Edit" asp-route-id="@book.id" class="btn action-btn btn-edit">
                                     Edit
                                 </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@book.id"
+                                          method="post"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Are you sure you want to delete this book?');">
+
+                                        <button type="submit" class="action-btn btn-delete">
+                                            Delete
+                                        </button>
+
+                                    </form>
+                                </div>
                             </td>
                         </tr>
 
@@ -305,12 +329,12 @@
     }
 
     .btn-edit {
-        background: #d97706;
+        background: #f59e0b;
         color: white;
     }
 
         .btn-edit:hover {
-            background: #b45309;
+            background: #d97706;
             color: white;
         }
 
@@ -336,6 +360,15 @@
         cursor: default;
     }
 
+    .btn-delete {
+        background: #dc3545;
+        color: white;
+    }
+
+        .btn-delete:hover {
+            background: #bb2d3b;
+            color: white;
+        }
 </style>
 
 
