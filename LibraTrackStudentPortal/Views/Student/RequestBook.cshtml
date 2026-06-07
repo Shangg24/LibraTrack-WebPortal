@@ -45,15 +45,9 @@
 
     <br />
 
-    <div class="mb-3">
-        <span class="badge bg-primary" id="selectedCount">
-            0 Books Selected
-        </span>
-    </div>
-
     <table class="table table-hover align-middle request-table">
         <thead>
-            <tr class="selectable-row">
+            <tr>
                 <th style="width:80px;">Select</th>
                 <th>Book Title</th>
                 <th style="width:180px;">Status</th>
@@ -280,7 +274,7 @@
 
     }
 
-        $(document).on("click", ".selectable-row", function (e) {
+            $(document).on("click", ".selectable-row", function (e) {
 
         if ($(e.target).is("input"))
             return;
@@ -289,29 +283,10 @@
 
         checkbox.prop("checked", !checkbox.prop("checked"));
 
-        checkbox.trigger("change");
-
-    });
-
-        $(document).on("change", ".book-checkbox", function () {
-
-        $(this)
-            .closest("tr")
-            .toggleClass(
-                "selected-book",
-                $(this).is(":checked")
-            );
-
-        updateSelectedCount();
-
-    });
-
-        function updateSelectedCount() {
-
-        let count = $(".book-checkbox:checked").length;
-
-        $("#selectedCount").text(
-            count + " Book(s) Selected"
+        $(this).toggleClass(
+            "selected-book",
+            checkbox.is(":checked")
         );
-    }
+    });
+
 </script>

@@ -44,7 +44,20 @@ namespace LibraTrackStudentPortal.Controllers
                                         BookId = g.Key.id,
                                         BookTitle = g.Key.book_title,
                                         Count = g.Count()
-                                    }).Take(10).ToList();
+                                    }).Take(5).ToList();
+
+            var forecastSourceBooks = (from ib in _context.issue_books
+                                       join b in _context.books on ib.book_id equals b.id
+                                       group b by new { b.id, b.book_title } into g
+                                       orderby g.Count() descending
+                                       select new TopBookViewModel
+                                       {
+                                           BookId = g.Key.id,
+                                           BookTitle = g.Key.book_title,
+                                           Count = g.Count()
+                                       })
+                           .Take(10)
+                           .ToList();
 
             var topRequestedBooks = (from r in _context.book_requests
                                      join b in _context.books on r.book_id equals b.id
@@ -75,7 +88,7 @@ namespace LibraTrackStudentPortal.Controllers
                                 .OrderByDescending(x => x.RequestCount + x.BorrowCount)
                                 .ToList();
 
-            var forecastBooks = topBorrowedBooks
+            var forecastBooks = forecastSourceBooks
     .Select(x => new BookForecastViewModel
     {
         BookTitle = x.BookTitle,
